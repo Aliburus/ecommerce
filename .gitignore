@@ -10,7 +10,9 @@ node_modules/
 /build
 /dist
 
-/uploads
+# Uploads
+uploads/
+/uploads/
 
 # Misc
 .DS_Store
