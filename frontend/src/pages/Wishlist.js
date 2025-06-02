@@ -79,7 +79,7 @@ function Wishlist() {
                 <h3 className="text-m mb-1 font-thin text-center">
                   {item.product.name}
                 </h3>
-                <p className="text-black text-center text-lg font-serif mb-2">
+                <p className="text-black text-center text-lg  mb-2">
                   {item.product.price} ₺
                 </p>
               </div>

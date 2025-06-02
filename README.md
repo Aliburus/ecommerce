@@ -84,7 +84,7 @@ npm start
 
 ## 🖼️ Ekran Görüntüleri
 
-> Buraya arayüzden ve admin panelinden örnek görseller ekleyebilirsin.
+Screenshots klasörü içinde
 
 ## 🤝 Katkı Sağlama
 

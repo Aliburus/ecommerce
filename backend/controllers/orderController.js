@@ -1,6 +1,8 @@
 const Order = require("../models/orderModel");
 const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
+const AdminSettings = require("../models/adminSettingsModel");
+const sendMail = require("../utils/sendMail");
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -39,6 +41,23 @@ const createOrder = asyncHandler(async (req, res) => {
   });
 
   const createdOrder = await order.save();
+  try {
+    // Bildirim gönder
+    const adminSettings = await AdminSettings.findOne();
+    if (
+      adminSettings &&
+      adminSettings.notificationSettings.newOrder &&
+      adminSettings.contactEmail
+    ) {
+      await sendMail(
+        adminSettings.contactEmail,
+        "Yeni Sipariş",
+        "Sistemde yeni bir sipariş oluşturuldu."
+      );
+    }
+  } catch (error) {
+    console.error("Bildirim gönderimi hatası:", error);
+  }
   res.status(201).json(createdOrder);
 });
 

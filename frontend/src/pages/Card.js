@@ -196,7 +196,7 @@ function Card() {
                       </button>
                     </div>
                   </div>
-                  <div className="ml-6 mr-2 text-right font-serif font-semibold text-lg text-black min-w-[80px]">
+                  <div className="ml-6 mr-2 text-right  font-semibold text-lg text-black min-w-[80px]">
                     {item.price} TL
                   </div>
                 </div>

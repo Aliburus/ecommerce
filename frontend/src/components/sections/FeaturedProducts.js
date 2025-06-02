@@ -45,7 +45,7 @@ function FeaturedProducts() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Öne Çıkan Ürünler</h2>
-          <a href="/urunler" className="text-gray-600 hover:text-black">
+          <a href="/men" className="text-gray-600 hover:text-black">
             Tümünü Gör →
           </a>
         </div>

@@ -2,6 +2,8 @@ const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
 const path = require("path");
 const fs = require("fs");
+const AdminSettings = require("../models/adminSettingsModel");
+const sendMail = require("../utils/sendMail");
 
 // @desc    Get all products
 // @route   GET /api/products
@@ -226,6 +228,25 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
 
     const updatedProduct = await product.save();
+    // Stok bildirimi
+    if (updatedProduct.stock < 10) {
+      try {
+        const adminSettings = await AdminSettings.findOne();
+        if (
+          adminSettings &&
+          adminSettings.notificationSettings.stockAlert &&
+          adminSettings.contactEmail
+        ) {
+          await sendMail(
+            adminSettings.contactEmail,
+            "Stok Uyarısı",
+            `${updatedProduct.name} stoğu 10'un altına düştü!`
+          );
+        }
+      } catch (error) {
+        console.error("Stok uyarı maili gönderilemedi:", error);
+      }
+    }
     res.json(updatedProduct);
   } else {
     res.status(404);

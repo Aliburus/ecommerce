@@ -20,6 +20,7 @@ const invoiceRoutes = require("./routes/invoiceRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
+const adminSettingsRoutes = require("./routes/adminSettingsRoutes");
 
 dotenv.config();
 const app = express();
@@ -87,6 +88,7 @@ app.use("/api/addresses", addressRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/admins", adminRoutes);
 app.use("/api/collections", collectionRoutes);
+app.use("/api/admin-settings", adminSettingsRoutes);
 
 // Static uploads
 const uploadsPath = path.join(__dirname, "uploads");

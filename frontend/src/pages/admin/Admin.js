@@ -28,6 +28,12 @@ import {
   createProduct,
 } from "../../services/productService";
 import { getCategories } from "../../services/categoryService";
+import { getUsers } from "../../services/userService";
+import { getOrders } from "../../services/orderService";
+import {
+  getAdminSettings,
+  updateAdminSettings,
+} from "../../services/adminSettingsService";
 
 function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -92,6 +98,12 @@ function Admin() {
   const [addProductSuccess, setAddProductSuccess] = useState("");
   const [categories, setCategories] = useState([]);
   const [editProductFiles, setEditProductFiles] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [adminSettings, setAdminSettings] = useState({
+    notificationSettings: { newOrder: true, stockAlert: true },
+  });
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   const genderOptions = [
     { value: "Kadın", label: "Kadın" },
@@ -103,6 +115,13 @@ function Admin() {
     if (activeTab === "collections") {
       fetchCollections();
       fetchProducts();
+    }
+    if (activeTab === "customers") {
+      fetchUsers();
+      fetchOrders();
+    }
+    if (activeTab === "settings") {
+      fetchAdminSettings();
     }
     // eslint-disable-next-line
   }, [activeTab]);
@@ -170,6 +189,58 @@ function Admin() {
     } catch (err) {
       console.error("Kategoriler alınamadı:", err);
     }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const data = await getUsers();
+      setUsers(data);
+    } catch {}
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const data = await getOrders();
+      setOrders(data);
+    } catch {}
+  };
+
+  const fetchAdminSettings = async () => {
+    setSettingsLoading(true);
+    try {
+      const data = await getAdminSettings();
+      setAdminSettings(data);
+    } catch {}
+    setSettingsLoading(false);
+  };
+
+  const handleSettingsSwitch = async (key) => {
+    const newSettings = {
+      ...adminSettings.notificationSettings,
+      [key]: !adminSettings.notificationSettings[key],
+    };
+    setAdminSettings((prev) => ({
+      ...prev,
+      notificationSettings: newSettings,
+    }));
+    await updateAdminSettings(
+      newSettings,
+      adminSettings.storeName,
+      adminSettings.contactEmail
+    );
+  };
+
+  const handleStoreInputChange = (e) => {
+    const { name, value } = e.target;
+    setAdminSettings((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleStoreSave = async () => {
+    await updateAdminSettings(
+      adminSettings.notificationSettings,
+      adminSettings.storeName,
+      adminSettings.contactEmail
+    );
   };
 
   const handleCollectionChange = (e) => {
@@ -578,62 +649,36 @@ function Admin() {
                     <th className="pb-4">Ürünler</th>
                     <th className="pb-4">Toplam</th>
                     <th className="pb-4">Durum</th>
-                    <th className="pb-4">İşlem</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    {
-                      id: "#12345",
-                      date: "2024-03-15",
-                      customer: "Ayşe Demir",
-                      products: "2 ürün",
-                      total: "₺8,999",
-                      status: "Tamamlandı",
-                    },
-                    {
-                      id: "#12346",
-                      date: "2024-03-14",
-                      customer: "Mehmet Yılmaz",
-                      products: "1 ürün",
-                      total: "₺12,999",
-                      status: "İşlemde",
-                    },
-                    {
-                      id: "#12347",
-                      date: "2024-03-14",
-                      customer: "Zeynep Kaya",
-                      products: "3 ürün",
-                      total: "₺24,999",
-                      status: "Kargoda",
-                    },
-                  ].map((order, index) => (
-                    <tr key={index} className="border-b last:border-0">
-                      <td className="py-4">{order.id}</td>
-                      <td className="py-4">{order.date}</td>
-                      <td className="py-4">{order.customer}</td>
-                      <td className="py-4">{order.products}</td>
-                      <td className="py-4">{order.total}</td>
-                      <td className="py-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm ${
-                            order.status === "Tamamlandı"
-                              ? "bg-green-100 text-green-800"
-                              : order.status === "İşlemde"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-blue-100 text-blue-800"
-                          }`}
-                        >
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="py-4">
-                        <button className="text-blue-600 hover:text-blue-800">
-                          Detay
-                        </button>
+                  {orders.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="text-center text-gray-500 py-10 text-lg"
+                      >
+                        Şu an sipariş yok
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    orders.map((order) => (
+                      <tr key={order._id} className="border-b last:border-0">
+                        <td className="py-4">
+                          {order._id.slice(-6).toUpperCase()}
+                        </td>
+                        <td className="py-4">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-4">{order.user?.name || "-"}</td>
+                        <td className="py-4">{order.items?.length || 0}</td>
+                        <td className="py-4">
+                          ₺{(order.totalAmount || 0).toLocaleString("tr-TR")}
+                        </td>
+                        <td className="py-4">{order.status}</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1117,55 +1162,35 @@ function Admin() {
                     <th className="pb-4">Kayıt Tarihi</th>
                     <th className="pb-4">Toplam Sipariş</th>
                     <th className="pb-4">Toplam Harcama</th>
-                    <th className="pb-4">Durum</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    {
-                      name: "Ayşe Demir",
-                      email: "ayse@email.com",
-                      date: "2024-01-15",
-                      orders: 8,
-                      spent: "₺45,999",
-                      status: "Aktif",
-                    },
-                    {
-                      name: "Mehmet Yılmaz",
-                      email: "mehmet@email.com",
-                      date: "2024-02-20",
-                      orders: 3,
-                      spent: "₺12,999",
-                      status: "Aktif",
-                    },
-                    {
-                      name: "Zeynep Kaya",
-                      email: "zeynep@email.com",
-                      date: "2024-03-01",
-                      orders: 1,
-                      spent: "₺24,999",
-                      status: "Yeni",
-                    },
-                  ].map((customer, index) => (
-                    <tr key={index} className="border-b last:border-0">
-                      <td className="py-4">{customer.name}</td>
-                      <td className="py-4">{customer.email}</td>
-                      <td className="py-4">{customer.date}</td>
-                      <td className="py-4">{customer.orders}</td>
-                      <td className="py-4">{customer.spent}</td>
-                      <td className="py-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm ${
-                            customer.status === "Aktif"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-blue-100 text-blue-800"
-                          }`}
-                        >
-                          {customer.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {users.map((user) => {
+                    const userOrders = orders.filter(
+                      (o) =>
+                        o.user &&
+                        (o.user._id === user._id || o.user === user._id)
+                    );
+                    const totalSpent = userOrders.reduce(
+                      (sum, o) => sum + (o.totalAmount || 0),
+                      0
+                    );
+                    return (
+                      <tr key={user._id} className="border-b last:border-0">
+                        <td className="py-4">
+                          {user.name} {user.surname}
+                        </td>
+                        <td className="py-4">{user.email}</td>
+                        <td className="py-4">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-4">{userOrders.length}</td>
+                        <td className="py-4">
+                          ₺{totalSpent.toLocaleString("tr-TR")}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -1292,8 +1317,10 @@ function Admin() {
                       </label>
                       <input
                         type="text"
+                        name="storeName"
                         className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                        value="LUXE"
+                        value={adminSettings.storeName || ""}
+                        onChange={handleStoreInputChange}
                       />
                     </div>
                     <div>
@@ -1302,11 +1329,19 @@ function Admin() {
                       </label>
                       <input
                         type="email"
+                        name="contactEmail"
                         className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                        value="info@luxe.com"
+                        value={adminSettings.contactEmail || ""}
+                        onChange={handleStoreInputChange}
                       />
                     </div>
                   </div>
+                  <button
+                    className="mt-4 bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
+                    onClick={handleStoreSave}
+                  >
+                    Kaydet
+                  </button>
                 </div>
 
                 <div className="border-t pt-6">
@@ -1314,22 +1349,23 @@ function Admin() {
                     Bildirim Ayarları
                   </h3>
                   <div className="space-y-4">
-                    {[
-                      "Yeni sipariş bildirimleri",
-                      "Stok uyarıları",
-                      "Yeni müşteri kayıtları",
-                      "Sistem güncellemeleri",
-                    ].map((setting, index) => (
+                    {["newOrder", "stockAlert"].map((key, index) => (
                       <div
-                        key={index}
+                        key={key}
                         className="flex items-center justify-between"
                       >
-                        <span>{setting}</span>
+                        <span>
+                          {key === "newOrder"
+                            ? "Yeni sipariş bildirimleri"
+                            : "Stok uyarıları"}
+                        </span>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
                             className="sr-only peer"
-                            defaultChecked
+                            checked={!!adminSettings.notificationSettings[key]}
+                            onChange={() => handleSettingsSwitch(key)}
+                            disabled={settingsLoading}
                           />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                         </label>
@@ -1366,185 +1402,143 @@ function Admin() {
 
       case "collections":
         return (
-          <div>
-            <div className="flex justify-between items-center mb-8">
-              <h1 className="text-2xl font-bold">Koleksiyonlar</h1>
-            </div>
-            <form
-              onSubmit={handleCollectionSubmit}
-              className="bg-white rounded-xl shadow-sm p-6 mb-8 max-w-xl"
-            >
-              <h2 className="text-lg font-semibold mb-4">
-                Yeni Koleksiyon Ekle
-              </h2>
-              {error && <div className="text-red-600 mb-2">{error}</div>}
-              {success && <div className="text-green-600 mb-2">{success}</div>}
-              <div className="mb-4">
-                <label className="block mb-1">Koleksiyon Adı</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={newCollection.name}
-                  onChange={handleCollectionChange}
-                  className="w-full border px-4 py-2"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Açıklama</label>
-                <textarea
-                  name="description"
-                  value={newCollection.description}
-                  onChange={handleCollectionChange}
-                  className="w-full border px-4 py-2"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Görsel Linki</label>
-                <input
-                  type="text"
-                  name="image"
-                  value={newCollection.image}
-                  onChange={handleCollectionChange}
-                  className="w-full border px-4 py-2"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Ürünler</label>
-                <button
-                  type="button"
-                  className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 mb-2"
-                  onClick={() => setShowProductSelect((v) => !v)}
-                >
-                  Ürün Ekle
-                </button>
-                {selectedProducts.length > 0 && (
-                  <div className="mb-2 flex flex-wrap gap-2">
-                    {products
-                      .filter((p) => selectedProducts.includes(p._id))
-                      .map((p) => (
-                        <span
-                          key={p._id}
-                          className="bg-gray-200 px-2 py-1 rounded text-sm"
-                        >
-                          {p.name}
-                        </span>
-                      ))}
-                  </div>
-                )}
-                {showProductSelect && (
-                  <div className="border p-2 max-h-48 overflow-y-auto bg-white shadow-lg z-10 relative">
-                    {productsError && (
-                      <div className="text-red-600 mb-2">{productsError}</div>
-                    )}
-                    {Array.isArray(products) &&
-                      products.length === 0 &&
-                      !productsError && (
-                        <div className="text-gray-500">Ürün bulunamadı</div>
-                      )}
-                    {Array.isArray(products) &&
-                      products.map((product) => (
-                        <div
-                          key={product._id}
-                          className="flex items-center mb-1"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedProducts.includes(product._id)}
-                            onChange={() => handleProductSelect(product._id)}
-                            id={`product-${product._id}`}
-                            className="mr-2"
-                          />
-                          <label htmlFor={`product-${product._id}`}>
-                            {product.name}
-                          </label>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
+          <div className="w-full">
+            <div className="flex flex-col md:flex-row gap-8">
+              <form
+                onSubmit={handleCollectionSubmit}
+                className="bg-white rounded-xl shadow-sm p-6 mb-8 w-full md:w-1/3"
               >
-                {loading ? "Ekleniyor..." : "Koleksiyon Ekle"}
-              </button>
-            </form>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {collections.map((col) => (
-                <div
-                  key={col._id}
-                  className="bg-white rounded-xl shadow-sm overflow-hidden"
-                >
-                  {col.image && (
-                    <img
-                      src={col.image}
-                      alt={col.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  )}
-                  <div className="p-4">
-                    <h3 className="font-semibold">{col.name}</h3>
-                    <p className="text-gray-600 mb-2">{col.description}</p>
-                    <button
-                      className="mt-2 px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
-                      onClick={() => handleShowProductForm(col._id)}
-                    >
-                      Ürün Ekle
-                    </button>
-                    <button
-                      className="mt-2 ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800"
-                      onClick={() => openEditModal(col)}
-                    >
-                      Düzenle
-                    </button>
-                    <button
-                      className="mt-2 ml-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800"
-                      onClick={() => handleDeleteCollection(col._id)}
-                    >
-                      Sil
-                    </button>
-                    {showProductForm[col._id] && (
-                      <div className="mt-2">
-                        <select
-                          value={productIdInput[col._id] || ""}
-                          onChange={(e) =>
-                            handleProductIdInput(col._id, e.target.value)
-                          }
-                          className="border px-2 py-1 mr-2"
-                        >
-                          <option value="">Ürün Seç</option>
-                          {Array.isArray(products) &&
-                            products.map((product) => (
-                              <option key={product._id} value={product._id}>
-                                {product.name}
-                              </option>
-                            ))}
-                        </select>
-                        <button
-                          className="px-3 py-1 bg-green-600 text-white rounded"
-                          onClick={() => handleAddProduct(col._id)}
-                          type="button"
-                          disabled={!productIdInput[col._id]}
-                        >
-                          Ekle
-                        </button>
-                        {productAddError && (
-                          <div className="text-red-600 mt-1">
-                            {productAddError}
-                          </div>
-                        )}
-                        {productAddSuccess && (
-                          <div className="text-green-600 mt-1">
-                            {productAddSuccess}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                <h2 className="text-lg font-semibold mb-4">
+                  Yeni Koleksiyon Ekle
+                </h2>
+                {error && <div className="text-red-600 mb-2">{error}</div>}
+                {success && (
+                  <div className="text-green-600 mb-2">{success}</div>
+                )}
+                <div className="mb-4">
+                  <label className="block mb-1">Koleksiyon Adı</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={newCollection.name}
+                    onChange={handleCollectionChange}
+                    className="w-full border px-4 py-2"
+                    required
+                  />
                 </div>
-              ))}
+                <div className="mb-4">
+                  <label className="block mb-1">Açıklama</label>
+                  <textarea
+                    name="description"
+                    value={newCollection.description}
+                    onChange={handleCollectionChange}
+                    className="w-full border px-4 py-2"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-1">Görsel Linki</label>
+                  <input
+                    type="text"
+                    name="image"
+                    value={newCollection.image}
+                    onChange={handleCollectionChange}
+                    className="w-full border px-4 py-2"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-1">Ürünler</label>
+                  <button
+                    type="button"
+                    className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 mb-2"
+                    onClick={() => setShowProductSelect((v) => !v)}
+                  >
+                    Ürün Ekle
+                  </button>
+                  {selectedProducts.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      {products
+                        .filter((p) => selectedProducts.includes(p._id))
+                        .map((p) => (
+                          <span
+                            key={p._id}
+                            className="bg-gray-200 px-2 py-1 rounded text-sm"
+                          >
+                            {p.name}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                  {showProductSelect && (
+                    <div className="border p-2 max-h-48 overflow-y-auto bg-white shadow-lg z-10 relative">
+                      {productsError && (
+                        <div className="text-red-600 mb-2">{productsError}</div>
+                      )}
+                      {Array.isArray(products) &&
+                        products.length === 0 &&
+                        !productsError && (
+                          <div className="text-gray-500">Ürün bulunamadı</div>
+                        )}
+                      {Array.isArray(products) &&
+                        products.map((product) => (
+                          <div
+                            key={product._id}
+                            className="flex items-center mb-1"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedProducts.includes(product._id)}
+                              onChange={() => handleProductSelect(product._id)}
+                              id={`product-${product._id}`}
+                              className="mr-2"
+                            />
+                            <label htmlFor={`product-${product._id}`}>
+                              {product.name}
+                            </label>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
+                >
+                  {loading ? "Ekleniyor..." : "Koleksiyon Ekle"}
+                </button>
+              </form>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                {collections.map((col) => (
+                  <div
+                    key={col._id}
+                    className="bg-white rounded-xl shadow-sm overflow-hidden"
+                  >
+                    {col.image && (
+                      <img
+                        src={col.image}
+                        alt={col.name}
+                        className="w-full h-48 object-cover"
+                      />
+                    )}
+                    <div className="p-4">
+                      <h3 className="font-semibold">{col.name}</h3>
+                      <p className="text-gray-600 mb-2">{col.description}</p>
+                      <button
+                        className="mt-2 ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800"
+                        onClick={() => openEditModal(col)}
+                      >
+                        Düzenle
+                      </button>
+                      <button
+                        className="mt-2 ml-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800"
+                        onClick={() => handleDeleteCollection(col._id)}
+                      >
+                        Sil
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             {/* Düzenle Modalı */}
             {editModal.open && (
@@ -1771,10 +1765,10 @@ function Admin() {
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-black min-h-screen p-4">
-          <div className="flex items-center space-x-2 px-4 py-6 border-b border-gray-700">
-            <LayoutDashboard className="h-8 w-8 text-white" />
-            <span className="text-white text-xl font-bold">LUXE Admin</span>
+        <div className="w-64 bg-white min-h-screen p-4">
+          <div className="flex items-center space-x-2 px-4 py-6 border-b border-gray-200">
+            <LayoutDashboard className="h-8 w-8 text-black" />
+            <span className="text-black text-xl font-bold">LUXE Admin</span>
           </div>
 
           <nav className="mt-8 space-y-2">
@@ -1784,8 +1778,8 @@ function Admin() {
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                   activeTab === item.id
-                    ? "bg-white text-black"
-                    : "text-gray-300 hover:bg-gray-800"
+                    ? "bg-gray-100 text-black"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <item.icon className="h-5 w-5" />

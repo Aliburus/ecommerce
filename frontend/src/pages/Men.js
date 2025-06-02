@@ -127,7 +127,7 @@ function Men() {
           }
         />
         <div className="flex-1">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8 mb-10">
             {filteredProducts.map((product) => (
               <div
                 key={product._id}
@@ -162,7 +162,7 @@ function Men() {
                 <h3 className="text-m font-thin mb-1 text-center">
                   {product.name}
                 </h3>
-                <p className="text-black text-center text-lg font-serif mb-2">
+                <p className="text-black text-center text-lg  mb-2">
                   {product.price} ₺
                 </p>
               </div>

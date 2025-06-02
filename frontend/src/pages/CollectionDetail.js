@@ -101,7 +101,7 @@ function CollectionDetail() {
                 <h3 className="text-m font-thin mb-1 text-center text-black line-clamp-2 min-h-[48px]">
                   {product.name}
                 </h3>
-                <p className="text-black text-center text-lg font-serif mb-2">
+                <p className="text-black text-center text-lg  mb-2">
                   {product.price} ₺
                 </p>
               </div>
