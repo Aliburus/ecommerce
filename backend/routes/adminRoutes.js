@@ -8,7 +8,7 @@ const { protect } = require("../middleware/authMiddleware");
 router.post("/login", adminController.loginAdmin);
 
 // Mevcut protected admin işlemleri…
-router.post("/", adminController.addAdmin); // İlk admin ekleme için korumasız
+router.post("/", protect, adminController.addAdmin); // İlk admin ekleme için korumasız
 router.put("/:id/password", protect, adminController.changePassword);
 router.get("/", protect, adminController.getAllAdmins);
 router.get("/:id", protect, adminController.getAdminById);

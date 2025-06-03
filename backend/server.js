@@ -21,6 +21,7 @@ const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
 const adminSettingsRoutes = require("./routes/adminSettingsRoutes");
+const heroRoutes = require("./routes/heroRoutes");
 
 dotenv.config();
 const app = express();
@@ -33,7 +34,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3000",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -89,6 +90,7 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/admins", adminRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/admin-settings", adminSettingsRoutes);
+app.use("/api/hero", heroRoutes);
 
 // Static uploads
 const uploadsPath = path.join(__dirname, "uploads");

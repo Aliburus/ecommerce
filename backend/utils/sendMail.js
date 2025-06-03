@@ -16,13 +16,11 @@ const transporter = nodemailer.createTransport({
 async function sendMail(to, subject, text) {
   try {
     console.log("Mail gönderme başladı...");
-    console.log("MAIL_USER:", "aliburus1905@gmail.com");
-    console.log("MAIL_PASS uzunluğu:", "kglxrljoecawblzp".length);
-    console.log("ENV USER:", process.env.MAIL_USER);
-    console.log("ENV PASS:", process.env.MAIL_PASS);
+    console.log("MAIL_USER:", process.env.MAIL_USER);
+    console.log("MAIL_PASS uzunluğu:", process.env.MAIL_PASS?.length);
 
     const info = await transporter.sendMail({
-      from: "aliburus1905@gmail.com",
+      from: process.env.MAIL_USER,
       to,
       subject,
       text,

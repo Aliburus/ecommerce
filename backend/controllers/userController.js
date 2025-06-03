@@ -209,28 +209,22 @@ const deleteUser = async (req, res) => {
 
 // Şifre değiştirme
 const changePassword = async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id);
 
-    const isMatch = await user.matchPassword(oldPassword);
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Incorrect old password" });
+      return res.status(400).json({ message: "Mevcut şifre yanlış" });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
 
-    res.status(200).json({ message: "Password changed successfully" });
+    res.json({ message: "Şifre başarıyla değiştirildi" });
   } catch (error) {
-    console.error("Error changing password:", error);
-    res.status(500).json({ message: "Error changing password", error });
+    res.status(500).json({ message: "Şifre değiştirilemedi", error });
   }
 };
 

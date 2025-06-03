@@ -69,6 +69,7 @@ const productSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    soldCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

@@ -1,16 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, Search, User, Heart } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import { FaUserShield } from "react-icons/fa";
+import { getAdminSettings } from "../services/adminSettingsService";
 
 function Navbar() {
   const { user } = useAuth();
   const { wishlist } = useWishlist();
   const { cart } = useCart();
   const navigate = useNavigate();
+  const [storeName, setStoreName] = useState("Fashion");
+
+  useEffect(() => {
+    const fetchStoreName = async () => {
+      try {
+        const settings = await getAdminSettings();
+        if (settings.storeName) {
+          setStoreName(settings.storeName);
+        }
+      } catch (error) {
+        console.error("Mağaza ismi alınamadı:", error);
+      }
+    };
+    fetchStoreName();
+  }, []);
 
   const cartItemCount =
     cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
@@ -25,7 +41,7 @@ function Navbar() {
               <span className="text-white text-lg font-bold">F</span>
             </div>
             <span className="ml-2 text-lg font-semibold text-black">
-              Fashion
+              {storeName}
             </span>
           </Link>
         </div>

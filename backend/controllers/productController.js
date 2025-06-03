@@ -59,22 +59,21 @@ const getProductById = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, price, description, category, sku, gender } = req.body;
+    const { name, price, description, category, gender } = req.body;
 
     // Kategori kontrolü
     if (!category) {
       return res.status(400).json({ message: "Kategori seçilmedi" });
     }
 
-    // SKU kontrolü
-    if (!sku) {
-      return res.status(400).json({ message: "SKU alanı zorunlu" });
-    }
-
     // Gender kontrolü
     if (!gender) {
       return res.status(400).json({ message: "Cinsiyet seçilmedi" });
     }
+
+    // Otomatik benzersiz SKU oluştur
+    const random = Math.floor(1000 + Math.random() * 9000);
+    const sku = `${name?.substring(0, 3)?.toUpperCase() || "PRD"}-${random}`;
 
     let variants = [];
     if (req.body.variants) {
@@ -190,67 +189,83 @@ const createProduct = asyncHandler(async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 const updateProduct = asyncHandler(async (req, res) => {
-  const {
-    name,
-    price,
-    description,
-    category,
-    stock,
-    specifications,
-    variants,
-    isActive,
-  } = req.body;
+  try {
+    const { id } = req.params;
+    const { name, price, description, category, stock, sku, gender, variants } =
+      req.body;
 
-  const product = await Product.findById(req.params.id);
-
-  if (product) {
-    product.name = name || product.name;
-    product.price = price || product.price;
-    product.description = description || product.description;
-    product.category = category || product.category;
-    product.stock = stock || product.stock;
-    product.specifications = specifications || product.specifications;
-    product.variants = variants || product.variants;
-    product.isActive = isActive !== undefined ? isActive : product.isActive;
-
-    if (variants && Array.isArray(variants)) {
-      for (const v of variants) {
-        if (!v.size || v.stock === undefined || v.stock === "") {
-          return res.status(400).json({
-            message: "Her varyant için beden ve stok zorunludur.",
-          });
-        }
-      }
-      product.variants = variants.map((v) => ({
-        size: v.size,
-        stock: Number(v.stock),
-      }));
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Ürün bulunamadı" });
     }
 
-    const updatedProduct = await product.save();
-    // Stok bildirimi
-    if (updatedProduct.stock < 10) {
+    // Varyantları işle
+    let processedVariants = [];
+    if (variants) {
       try {
-        const adminSettings = await AdminSettings.findOne();
-        if (
-          adminSettings &&
-          adminSettings.notificationSettings.stockAlert &&
-          adminSettings.contactEmail
-        ) {
-          await sendMail(
-            adminSettings.contactEmail,
-            "Stok Uyarısı",
-            `${updatedProduct.name} stoğu 10'un altına düştü!`
-          );
-        }
-      } catch (error) {
-        console.error("Stok uyarı maili gönderilemedi:", error);
+        processedVariants = JSON.parse(variants);
+      } catch (e) {
+        return res.status(400).json({ message: "Geçersiz varyant formatı" });
       }
     }
-    res.json(updatedProduct);
-  } else {
-    res.status(404);
-    throw new Error("Ürün bulunamadı");
+
+    // Resimleri işle
+    let images = product.images || [];
+    if (req.files && req.files.length > 0) {
+      const newImages = req.files.map((file) => ({
+        url: file.path.replace(/\\/g, "/"),
+      }));
+      images = [...images, ...newImages];
+    }
+
+    // Ürünü güncelle
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      {
+        name,
+        price,
+        description,
+        category,
+        stock,
+        sku,
+        gender,
+        variants: processedVariants,
+        images,
+      },
+      { new: true }
+    ).populate("category");
+
+    // Kritik stok kontrolü ve mail bildirimi
+    if (processedVariants && processedVariants.length > 0) {
+      const lowStockVariants = processedVariants.filter(
+        (v) => Number(v.stock) < 10
+      );
+      if (lowStockVariants.length > 0) {
+        try {
+          const adminSettings = await AdminSettings.findOne();
+          if (adminSettings && adminSettings.contactEmail) {
+            const variantList = lowStockVariants
+              .map((v) => `${v.size}: ${v.stock} adet`)
+              .join("\n");
+            await sendMail(
+              adminSettings.contactEmail,
+              `Kritik Stok Uyarısı: ${name}`,
+              `Aşağıdaki varyantların stoğu kritik seviyede (10'un altında):\n${variantList}`
+            );
+          }
+        } catch (err) {
+          console.error("Kritik stok maili gönderilemedi:", err);
+        }
+      }
+    }
+
+    res.json({
+      message: "Ürün başarıyla güncellendi",
+      product: updatedProduct,
+    });
+  } catch (error) {
+    console.error("Ürün güncellenirken hata:", error);
+    res.status(500).json({ message: "Ürün güncellenirken bir hata oluştu" });
   }
 });
 
@@ -380,6 +395,15 @@ const getProductsByCategory = asyncHandler(async (req, res) => {
   });
 });
 
+// En çok satılan ürünler
+const getBestSellingProducts = asyncHandler(async (req, res) => {
+  const products = await Product.find({ soldCount: { $gt: 0 } })
+    .sort({ soldCount: -1 })
+    .limit(20)
+    .select("name images price soldCount");
+  res.json(products);
+});
+
 module.exports = {
   getAllProducts,
   getProductById,
@@ -389,4 +413,5 @@ module.exports = {
   uploadProductImages,
   deleteProductImage,
   getProductsByCategory,
+  getBestSellingProducts,
 };

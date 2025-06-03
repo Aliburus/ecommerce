@@ -32,3 +32,8 @@ export const updateProduct = async (productId, updateData) => {
   );
   return res.data;
 };
+
+export const getBestSellingProducts = async () => {
+  const res = await axios.get(`${API_URL}/api/products/best-sellers`);
+  return res.data;
+};

@@ -11,3 +11,8 @@ export const createCategory = async (categoryData) => {
   const response = await axios.post(`${API_URL}/api/categories`, categoryData);
   return response.data;
 };
+
+export const getBestSellingCategories = async () => {
+  const res = await axios.get(`${API_URL}/api/categories/best-sellers`);
+  return res.data;
+};

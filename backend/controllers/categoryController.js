@@ -25,7 +25,40 @@ const createCategory = asyncHandler(async (req, res) => {
   res.status(201).json(createdCategory);
 });
 
+// En çok satılan kategoriler
+const getBestSellingCategories = asyncHandler(async (req, res) => {
+  const result = await Category.aggregate([
+    {
+      $lookup: {
+        from: "products",
+        localField: "_id",
+        foreignField: "category",
+        as: "products",
+      },
+    },
+    {
+      $addFields: {
+        soldCount: { $sum: "$products.soldCount" },
+      },
+    },
+    {
+      $match: { soldCount: { $gt: 0 } },
+    },
+    {
+      $sort: { soldCount: -1 },
+    },
+    {
+      $limit: 5,
+    },
+    {
+      $project: { name: 1, soldCount: 1 },
+    },
+  ]);
+  res.json(result);
+});
+
 module.exports = {
   getCategories,
   createCategory,
+  getBestSellingCategories,
 };

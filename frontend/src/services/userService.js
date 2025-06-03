@@ -7,3 +7,12 @@ export const getUsers = async () => {
   });
   return res.data;
 };
+
+export const changePassword = async (currentPassword, newPassword) => {
+  const res = await axios.put(
+    `${API_URL}/api/user/change-password`,
+    { currentPassword, newPassword },
+    { withCredentials: true }
+  );
+  return res.data;
+};

@@ -3,6 +3,7 @@ const router = express.Router();
 const productController = require("../controllers/productController");
 const { protect, admin } = require("../middleware/authMiddleware");
 const Product = require("../models/productModel");
+const { getBestSellingProducts } = require("../controllers/productController");
 
 // Tüm ürünleri getir
 router.get("/all", async (req, res) => {
@@ -15,6 +16,7 @@ router.get("/all", async (req, res) => {
 });
 
 // Public routes
+router.get("/best-sellers", getBestSellingProducts);
 router.get("/", productController.getAllProducts);
 router.get("/category/:categoryId", productController.getProductsByCategory);
 router.get("/:id", productController.getProductById);
