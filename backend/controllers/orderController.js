@@ -103,7 +103,10 @@ const getOrderById = asyncHandler(async (req, res) => {
 const updateOrderStatus = asyncHandler(async (req, res) => {
   const { status } = req.body;
 
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.id).populate(
+    "user",
+    "email name"
+  );
 
   if (!order) {
     res.status(404);
@@ -112,6 +115,25 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 
   order.status = status;
   const updatedOrder = await order.save();
+
+  // Kargo durumu güncellendiğinde mail gönder
+  if (status === "shipped" || status === "delivered") {
+    try {
+      const subject =
+        status === "shipped"
+          ? "Siparişiniz Kargoya Verildi"
+          : "Siparişiniz Teslim Edildi";
+      const message =
+        status === "shipped"
+          ? `Sayın ${order.user.name}, siparişiniz kargoya verilmiştir.`
+          : `Sayın ${order.user.name}, siparişiniz teslim edilmiştir.`;
+
+      await sendMail(order.user.email, subject, message);
+    } catch (error) {
+      console.error("Mail gönderme hatası:", error);
+    }
+  }
+
   res.json(updatedOrder);
 });
 

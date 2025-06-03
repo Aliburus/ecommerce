@@ -13,6 +13,7 @@ import {
   Download,
   Upload,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import {
   getCollections,
@@ -104,6 +105,7 @@ function Admin() {
     notificationSettings: { newOrder: true, stockAlert: true },
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const genderOptions = [
     { value: "Kadın", label: "Kadın" },
@@ -122,6 +124,9 @@ function Admin() {
     }
     if (activeTab === "settings") {
       fetchAdminSettings();
+    }
+    if (activeTab === "orders") {
+      fetchOrders();
     }
     // eslint-disable-next-line
   }, [activeTab]);
@@ -649,13 +654,14 @@ function Admin() {
                     <th className="pb-4">Ürünler</th>
                     <th className="pb-4">Toplam</th>
                     <th className="pb-4">Durum</th>
+                    <th className="pb-4">İşlemler</th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.length === 0 ? (
                     <tr>
                       <td
-                        colSpan="6"
+                        colSpan="7"
                         className="text-center text-gray-500 py-10 text-lg"
                       >
                         Şu an sipariş yok
@@ -671,11 +677,35 @@ function Admin() {
                           {new Date(order.createdAt).toLocaleDateString()}
                         </td>
                         <td className="py-4">{order.user?.name || "-"}</td>
-                        <td className="py-4">{order.items?.length || 0}</td>
+                        <td className="py-4">
+                          {order.items?.length || 0} ürün
+                        </td>
                         <td className="py-4">
                           ₺{(order.totalAmount || 0).toLocaleString("tr-TR")}
                         </td>
-                        <td className="py-4">{order.status}</td>
+                        <td className="py-4">
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm ${
+                              order.status === "completed"
+                                ? "bg-green-100 text-green-800"
+                                : order.status === "processing"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : order.status === "shipped"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="py-4">
+                          <button
+                            onClick={() => handleViewOrder(order._id)}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            Detay
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -1759,6 +1789,10 @@ function Admin() {
           </div>
         );
     }
+  };
+
+  const handleViewOrder = (orderId) => {
+    navigate(`/admin/orders/${orderId}`);
   };
 
   return (
