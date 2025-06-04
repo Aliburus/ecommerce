@@ -84,6 +84,30 @@ function Settings({
                   onChange={onStoreInputChange}
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kargo Limiti (TL)
+                </label>
+                <input
+                  type="number"
+                  name="shippingLimit"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  value={adminSettings.shippingLimit || 500}
+                  onChange={onStoreInputChange}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kargo Ücreti (TL)
+                </label>
+                <input
+                  type="number"
+                  name="shippingFee"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  value={adminSettings.shippingFee || 49.9}
+                  onChange={onStoreInputChange}
+                />
+              </div>
             </div>
             <button
               className="mt-4 bg-black text-white px-6 py-2 rounded hover:bg-gray-800"

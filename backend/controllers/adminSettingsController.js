@@ -19,10 +19,24 @@ exports.getAdminSettings = async (req, res) => {
 // Admin ayarlarını güncelle
 exports.updateAdminSettings = async (req, res) => {
   try {
-    const { notificationSettings, storeName, contactEmail } = req.body;
+    const {
+      notificationSettings,
+      storeName,
+      contactEmail,
+      shippingLimit,
+      shippingFee,
+    } = req.body;
     let settings = await AdminSettings.findOneAndUpdate(
       { admin: req.user._id },
-      { $set: { notificationSettings, storeName, contactEmail } },
+      {
+        $set: {
+          notificationSettings,
+          storeName,
+          contactEmail,
+          shippingLimit,
+          shippingFee,
+        },
+      },
       { new: true, upsert: true }
     );
     res.json(settings);

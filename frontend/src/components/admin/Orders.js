@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Filter, Download, X, Edit2, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getOrders } from "../../services/orderService";
+import { statusToText, getStatusBadgeClass } from "./statusUtils";
 
 function Orders({ onViewOrder, onUpdateStatus }) {
   const navigate = useNavigate();
@@ -10,11 +11,12 @@ function Orders({ onViewOrder, onUpdateStatus }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusNote, setStatusNote] = useState("");
 
+  const fetchOrders = async () => {
+    const data = await getOrders(search);
+    setOrders(data);
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      const data = await getOrders(search);
-      setOrders(data);
-    };
     fetchOrders();
   }, [search]);
 
@@ -49,12 +51,7 @@ function Orders({ onViewOrder, onUpdateStatus }) {
     []
   );
 
-  const getStatusLabel = useMemo(
-    () => (status) => {
-      return statusOptions.find((opt) => opt.value === status)?.label || status;
-    },
-    [statusOptions]
-  );
+  const getStatusLabel = (status) => statusToText(status);
 
   const getStatusColor = useMemo(
     () => (status) => {
@@ -71,11 +68,12 @@ function Orders({ onViewOrder, onUpdateStatus }) {
     setStatusNote("");
   };
 
-  const handleStatusUpdate = () => {
+  const handleStatusUpdate = async () => {
     if (selectedOrder) {
-      onUpdateStatus(selectedOrder.id, selectedOrder.status, statusNote);
+      await onUpdateStatus(selectedOrder.id, selectedOrder.status, statusNote);
       setSelectedOrder(null);
       setStatusNote("");
+      fetchOrders();
     }
   };
 
@@ -204,7 +202,7 @@ function Orders({ onViewOrder, onUpdateStatus }) {
                   <td className="py-4">
                     <div className="flex items-center space-x-2">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm ${getStatusColor(
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(
                           order.status
                         )}`}
                       >

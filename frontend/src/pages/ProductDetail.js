@@ -9,6 +9,8 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { getAdminSettings } from "../services/adminSettingsService";
+
 // Placeholder bileşenler
 const ProductGallery = ({ images }) => {
   const [mainImage, setMainImage] = useState(images[0]);
@@ -134,7 +136,7 @@ const AddToCartButton = ({ product, selectedSize }) => {
 
     try {
       setLoading(true);
-      const result = await addToCart(product._id, 1);
+      const result = await addToCart(product._id, 1, selectedSize);
       if (result.success) {
         Swal.fire({
           title: "Başarılı!",
@@ -209,68 +211,89 @@ const ProductDetails = ({ product }) => {
   );
 };
 
-const DeliveryInfo = () => (
-  <div className="mt-8 pt-6 border-t border-gray-200">
-    <h3 className="text-sm font-medium mb-4">Kargo ve İade Bilgileri</h3>
-    <div className="space-y-3">
-      <div className="flex items-center text-sm text-gray-600">
-        <svg
-          className="h-5 w-5 mr-2"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <p>
-          Bugün sipariş verirseniz <strong>1-3 iş günü</strong> içinde kargoya
-          verilir
-        </p>
-      </div>
-      <div className="flex items-center text-sm text-gray-600">
-        <svg
-          className="h-5 w-5 mr-2"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <p>
-          500₺ üzeri siparişlerde <strong>ücretsiz kargo</strong>
-        </p>
-      </div>
-      <div className="flex items-center text-sm text-gray-600">
-        <svg
-          className="h-5 w-5 mr-2"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <p>
-          14 gün içinde <strong>ücretsiz iade</strong>
-        </p>
+const DeliveryInfo = () => {
+  const { addToCart } = useCart();
+  const [adminSettings, setAdminSettings] = useState({
+    shippingLimit: 500,
+    shippingFee: 49.9,
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settings = await getAdminSettings();
+        setAdminSettings(settings);
+      } catch (error) {
+        console.error("Ayarlar alınamadı:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  return (
+    <div className="mt-8 pt-6 border-t border-gray-200">
+      <h3 className="text-sm font-medium mb-4">Kargo ve İade Bilgileri</h3>
+      <div className="space-y-3">
+        <div className="flex items-center text-sm text-gray-600">
+          <svg
+            className="h-5 w-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <p>
+            Bugün sipariş verirseniz <strong>1-3 iş günü</strong> içinde kargoya
+            verilir
+          </p>
+        </div>
+        <div className="flex items-center text-sm text-gray-600">
+          <svg
+            className="h-5 w-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <p>
+            {adminSettings.shippingLimit}₺ üzeri siparişlerde{" "}
+            <strong>ücretsiz kargo</strong>
+          </p>
+        </div>
+        <div className="flex items-center text-sm text-gray-600">
+          <svg
+            className="h-5 w-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <p>
+            14 gün içinde <strong>ücretsiz iade</strong>
+          </p>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -287,7 +310,7 @@ const ProductDetail = () => {
           `${process.env.REACT_APP_API_URL}/api/products/${id}`
         );
         setProduct(res.data);
-        setSelectedSize(res.data.variants?.[0]?.size || "");
+        setSelectedSize("");
         setLoading(false);
       } catch (err) {
         setError("Ürün bulunamadı");

@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 function Customers({ users, orders }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const usersPerPage = 10;
 
   const filteredUsers = useMemo(() => {
     if (!search) return users;
@@ -16,6 +18,12 @@ function Customers({ users, orders }) {
         (u.email && u.email.toLowerCase().includes(s))
     );
   }, [users, search]);
+
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const pagedUsers = filteredUsers.slice(
+    page * usersPerPage,
+    (page + 1) * usersPerPage
+  );
 
   return (
     <div>
@@ -51,7 +59,7 @@ function Customers({ users, orders }) {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((user) => {
+            {pagedUsers.map((user) => {
               const userOrders = orders.filter(
                 (o) =>
                   o.user && (o.user._id === user._id || o.user === user._id)
@@ -82,6 +90,29 @@ function Customers({ users, orders }) {
             })}
           </tbody>
         </table>
+        {totalPages > 1 && (
+          <tfoot>
+            <tr>
+              <td colSpan="5">
+                <div className="flex justify-center mt-6 space-x-2">
+                  {Array.from({ length: totalPages }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setPage(idx)}
+                      className={`w-8 h-8 rounded-full border text-sm font-medium ${
+                        page === idx
+                          ? "bg-blue-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                </div>
+              </td>
+            </tr>
+          </tfoot>
+        )}
       </div>
     </div>
   );

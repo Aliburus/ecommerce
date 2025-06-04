@@ -57,7 +57,7 @@ const invoiceSchema = new mongoose.Schema(
     },
     dueDate: Date,
     notes: String,
-    pdfUrl: String,
+    pdfBuffer: Buffer,
   },
   { timestamps: true }
 );

@@ -10,6 +10,7 @@ import {
   Truck,
 } from "lucide-react";
 import { getOrderById, updateOrderStatus } from "../../services/orderService";
+import { statusToText, getStatusBadgeClass } from "./statusUtils";
 
 function OrderDetail() {
   const { id } = useParams();
@@ -61,22 +62,7 @@ function OrderDetail() {
     }
   };
 
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "pending":
-        return "Beklemede";
-      case "processing":
-        return "İşleniyor";
-      case "shipped":
-        return "Kargoda";
-      case "delivered":
-        return "Teslim Edildi";
-      case "cancelled":
-        return "İptal Edildi";
-      default:
-        return status;
-    }
-  };
+  const getStatusLabel = (status) => statusToText(status);
 
   if (loading) {
     return (
@@ -106,7 +92,7 @@ function OrderDetail() {
         </button>
         <div className="flex items-center space-x-4">
           <span
-            className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(
+            className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusBadgeClass(
               order.status
             )}`}
           >
@@ -236,7 +222,7 @@ function OrderDetail() {
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="pending">Beklemede</option>
-                <option value="processing">İşleniyor</option>
+                <option value="processing">Siparişiniz Hazırlanıyor</option>
                 <option value="shipped">Kargoda</option>
                 <option value="delivered">Teslim Edildi</option>
                 <option value="cancelled">İptal Edildi</option>
@@ -264,7 +250,11 @@ function OrderDetail() {
                   className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">
+                    <p
+                      className={`font-medium text-sm ${getStatusBadgeClass(
+                        history.status
+                      )}`}
+                    >
                       {getStatusLabel(history.status)}
                     </p>
                     <p className="text-sm text-gray-600">

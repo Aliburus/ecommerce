@@ -2,10 +2,10 @@ import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-const addToCart = async (productId, quantity) => {
+const addToCart = async (productId, quantity, size) => {
   const response = await axios.post(
     `${API_URL}/api/cart/add`,
-    { productId, quantity },
+    { productId, quantity, size },
     { withCredentials: true }
   );
   return response.data;
@@ -18,18 +18,20 @@ const getCart = async () => {
   return response.data;
 };
 
-const updateCartItem = async (productId, quantity) => {
+const updateCartItem = async (productId, quantity, size) => {
   const response = await axios.put(
     `${API_URL}/api/cart/update`,
-    { productId, quantity },
+    { productId, quantity, size },
     { withCredentials: true }
   );
   return response.data;
 };
 
-const removeFromCart = async (productId) => {
+const removeFromCart = async (productId, size) => {
   const response = await axios.delete(
-    `${API_URL}/api/cart/remove/${productId}`,
+    `${API_URL}/api/cart/remove/${productId}?size=${encodeURIComponent(
+      size || ""
+    )}`,
     {
       withCredentials: true,
     }

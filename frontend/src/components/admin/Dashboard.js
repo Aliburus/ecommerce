@@ -15,6 +15,25 @@ import { updateProduct } from "../../services/productService";
 import { toast } from "react-hot-toast";
 import { getBestSellingProducts } from "../../services/productService";
 import { getBestSellingCategories } from "../../services/categoryService";
+import { statusToText, getStatusBadgeClass } from "./statusUtils";
+
+// Status'a göre renk döndüren fonksiyon
+function getStatusColor(status) {
+  switch (status) {
+    case "pending":
+      return "text-yellow-600";
+    case "processing":
+      return "text-blue-600";
+    case "shipped":
+      return "text-purple-600";
+    case "delivered":
+      return "text-green-600";
+    case "cancelled":
+      return "text-red-600";
+    default:
+      return "text-gray-600";
+  }
+}
 
 function Dashboard() {
   const [stats, setStats] = useState({
@@ -47,6 +66,15 @@ function Dashboard() {
   const [bestCategories, setBestCategories] = useState([]);
 
   const navigate = useNavigate();
+
+  // En Çok Satılan Ürünler Slider State
+  const [productPage, setProductPage] = useState(0);
+  const productsPerPage = 5;
+  const totalProductPages = Math.ceil(bestProducts.length / productsPerPage);
+  const pagedProducts = bestProducts.slice(
+    productPage * productsPerPage,
+    (productPage + 1) * productsPerPage
+  );
 
   useEffect(() => {
     fetchDashboardData();
@@ -277,56 +305,133 @@ function Dashboard() {
       </div>
 
       {/* En Çok Satılanlar */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div
+          className="bg-white p-6 rounded-2xl shadow-sm custom-scrollbar"
+          style={{
+            maxHeight: "340px",
+            minHeight: "120px",
+            overflowY: "auto",
+            marginBottom: "24px",
+          }}
+        >
           <h2 className="text-lg font-semibold mb-4">En Çok Satılan Ürünler</h2>
-          <ul className="space-y-2">
-            {bestProducts.map((p) => (
-              <li key={p._id} className="flex items-center gap-4">
-                <img
-                  src={
-                    p.images?.[0]?.url?.startsWith("http")
-                      ? p.images?.[0]?.url
-                      : `${
-                          process.env.REACT_APP_API_URL ||
-                          "http://localhost:5000"
-                        }${p.images?.[0]?.url}`
-                  }
-                  alt={p.name}
-                  className="w-12 h-12 object-cover rounded"
+          {bestProducts.length === 0 ? (
+            <div className="text-center text-gray-400 py-8">
+              Şu anda en çok satan ürün yok
+            </div>
+          ) : (
+            <div className="flex items-center">
+              <button
+                className="mr-2 px-2 py-1 rounded bg-gray-100 hover:bg-gray-200"
+                onClick={() => setProductPage((prev) => Math.max(prev - 1, 0))}
+                disabled={productPage === 0}
+              >
+                &#8592;
+              </button>
+              <div className="flex space-x-3 overflow-x-auto pb-2">
+                {pagedProducts.map((p) => (
+                  <div
+                    key={p._id}
+                    className="flex flex-col items-center min-w-[100px] max-w-[110px] bg-gray-50 rounded-lg p-2 cursor-pointer hover:bg-gray-100"
+                    onClick={() => navigate(`/urun/${p._id}`)}
+                  >
+                    <img
+                      src={
+                        p.images?.[0]?.url?.startsWith("http")
+                          ? p.images?.[0]?.url
+                          : `${
+                              process.env.REACT_APP_API_URL ||
+                              "http://localhost:5000"
+                            }${p.images?.[0]?.url}`
+                      }
+                      alt={p.name}
+                      className="w-12 h-12 object-cover rounded mb-1"
+                    />
+                    <span className="font-medium text-center text-xs line-clamp-2">
+                      {p.name}
+                    </span>
+                    <span className="text-[10px] text-gray-500">
+                      {p.soldCount} satış
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <button
+                className="ml-2 px-2 py-1 rounded bg-gray-100 hover:bg-gray-200"
+                onClick={() =>
+                  setProductPage((prev) =>
+                    Math.min(prev + 1, totalProductPages - 1)
+                  )
+                }
+                disabled={
+                  productPage === totalProductPages - 1 ||
+                  totalProductPages === 0
+                }
+              >
+                &#8594;
+              </button>
+            </div>
+          )}
+          {totalProductPages > 1 && (
+            <div className="flex justify-center mt-2 space-x-1">
+              {Array.from({ length: totalProductPages }).map((_, idx) => (
+                <span
+                  key={idx}
+                  className={`inline-block w-2 h-2 rounded-full ${
+                    idx === productPage ? "bg-blue-500" : "bg-gray-300"
+                  }`}
                 />
-                <span className="font-medium">{p.name}</span>
-                <span className="ml-auto text-sm text-gray-500">
-                  {p.soldCount} satış
-                </span>
-              </li>
-            ))}
-          </ul>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        <div
+          className="bg-white p-6 rounded-2xl shadow-sm custom-scrollbar"
+          style={{
+            maxHeight: "340px",
+            minHeight: "120px",
+            overflowY: "auto",
+            marginBottom: "24px",
+          }}
+        >
           <h2 className="text-lg font-semibold mb-4">
             En Çok Satılan Kategoriler
           </h2>
-          <ul className="space-y-2">
-            {bestCategories.map((c) => (
-              <li key={c._id} className="flex items-center gap-4">
-                <span className="font-medium">{c.name}</span>
-                <span className="ml-auto text-sm text-gray-500">
-                  {c.soldCount} satış
-                </span>
-              </li>
-            ))}
-          </ul>
+          {bestCategories.length === 0 ? (
+            <div className="text-center text-gray-400 py-8">
+              Şu anda en çok satan kategori yok
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {bestCategories.map((c) => (
+                <li key={c._id} className="flex items-center gap-4">
+                  <span className="font-medium">{c.name}</span>
+                  <span className="ml-auto text-sm text-gray-500">
+                    {c.soldCount} satış
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
       {/* Son Siparişler ve Stok Durumu */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Son Siparişler */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        <div
+          className="bg-white p-6 rounded-2xl shadow-sm custom-scrollbar"
+          style={{
+            maxHeight: "340px",
+            minHeight: "120px",
+            overflowY: "auto",
+            marginBottom: "24px",
+          }}
+        >
           <h2 className="text-lg font-semibold mb-4">Son Siparişler</h2>
           <div className="space-y-4">
-            {stats.recentOrders.map((order) => (
+            {stats.recentOrders.slice(0, 50).map((order) => (
               <div
                 key={order._id}
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"
@@ -350,19 +455,11 @@ function Dashboard() {
                     ₺{order.totalAmount.toLocaleString("tr-TR")}
                   </p>
                   <p
-                    className={`text-sm ${
-                      order.status === "delivered"
-                        ? "text-green-600"
-                        : order.status === "cancelled"
-                        ? "text-red-600"
-                        : "text-yellow-600"
-                    }`}
+                    className={`text-sm px-3 py-1 rounded-full font-medium ${getStatusBadgeClass(
+                      order.status
+                    )}`}
                   >
-                    {order.status === "delivered"
-                      ? "Teslim Edildi"
-                      : order.status === "cancelled"
-                      ? "İptal Edildi"
-                      : "İşleniyor"}
+                    {statusToText(order.status)}
                   </p>
                 </div>
               </div>
@@ -371,55 +468,69 @@ function Dashboard() {
         </div>
 
         {/* Kritik Stok */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div
+          className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 custom-scrollbar"
+          style={{
+            maxHeight: "340px",
+            minHeight: "120px",
+            overflowY: "auto",
+            marginBottom: "24px",
+          }}
+        >
           <h2 className="text-lg font-semibold mb-6 flex items-center">
             <AlertTriangle className="h-5 w-5 mr-2 text-red-600" />
             Kritik Stok
           </h2>
           <div className="space-y-4">
-            {stats.lowStockProducts.map((product) => (
-              <div
-                key={product._id}
-                className="flex items-center justify-between p-4 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100"
-                onClick={() => handleProductClick(product)}
-              >
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={`${
-                      process.env.REACT_APP_API_URL || "http://localhost:5000"
-                    }${product.images[0]?.url}`}
-                    alt={product.name}
-                    className="w-16 h-16 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "/placeholder.png";
-                    }}
-                  />
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      {product.name}
-                    </h3>
-                    <div className="mt-1 space-y-1">
-                      {product.variants
-                        .filter((v) => v.stock < 10)
-                        .map((variant) => (
-                          <p
-                            key={variant.size}
-                            className="text-sm text-red-600"
-                          >
-                            {variant.size} beden: {variant.stock} adet
-                          </p>
-                        ))}
+            {stats.lowStockProducts.length === 0 ? (
+              <div className="text-center text-gray-400 py-8">
+                Şu anda kritik stok yok
+              </div>
+            ) : (
+              stats.lowStockProducts.map((product) => (
+                <div
+                  key={product._id}
+                  className="flex items-center justify-between p-4 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100"
+                  onClick={() => handleProductClick(product)}
+                >
+                  <div className="flex items-center space-x-4">
+                    <img
+                      src={`${
+                        process.env.REACT_APP_API_URL || "http://localhost:5000"
+                      }${product.images[0]?.url}`}
+                      alt={product.name}
+                      className="w-16 h-16 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/placeholder.png";
+                      }}
+                    />
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        {product.name}
+                      </h3>
+                      <div className="mt-1 space-y-1">
+                        {product.variants
+                          .filter((v) => v.stock < 10)
+                          .map((variant) => (
+                            <p
+                              key={variant.size}
+                              className="text-sm text-red-600"
+                            >
+                              {variant.size} beden: {variant.stock} adet
+                            </p>
+                          ))}
+                      </div>
                     </div>
                   </div>
+                  <div className="text-right">
+                    <p className="font-medium text-gray-900">
+                      ₺{product.price.toLocaleString("tr-TR")}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-medium text-gray-900">
-                    ₺{product.price.toLocaleString("tr-TR")}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

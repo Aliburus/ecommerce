@@ -48,6 +48,13 @@ function Products({
   const [importFile, setImportFile] = useState(null);
   const [importError, setImportError] = useState("");
   const [importSuccess, setImportSuccess] = useState("");
+  const [page, setPage] = useState(0);
+  const productsPerPage = 10;
+  const totalPages = Math.ceil(products.length / productsPerPage);
+  const pagedProducts = products.slice(
+    page * productsPerPage,
+    (page + 1) * productsPerPage
+  );
 
   const genderOptions = [
     { value: "Kadın", label: "Kadın" },
@@ -438,55 +445,78 @@ function Products({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.length === 0 ? (
-          <div className="col-span-3 text-center text-gray-500 text-lg py-20">
-            Ürün bulunamadı
-          </div>
-        ) : (
-          products.map((product) => {
-            const imgSrc =
-              product.images && product.images[0]
-                ? typeof product.images[0] === "string"
-                  ? product.images[0]
-                  : product.images[0].url
-                : "https://via.placeholder.com/300x200?text=No+Image";
-            return (
-              <div
-                key={product._id}
-                className="bg-white rounded-xl shadow-sm overflow-hidden"
-              >
-                <img
-                  src={imgSrc}
-                  alt={product.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-semibold">{product.name}</h3>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-gray-600">{product.price} ₺</span>
-                    <span className="text-sm text-gray-500">
-                      Stok: {product.stock}
-                    </span>
+      <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {products.length === 0 ? (
+            <div className="text-center text-gray-500 text-lg py-20 col-span-2">
+              Ürün bulunamadı
+            </div>
+          ) : (
+            pagedProducts.map((product) => {
+              const imgSrc =
+                product.images && product.images[0]
+                  ? typeof product.images[0] === "string"
+                    ? product.images[0]
+                    : product.images[0].url
+                  : "https://via.placeholder.com/300x200?text=No+Image";
+              return (
+                <div
+                  key={product._id}
+                  className="flex items-center bg-white rounded-xl shadow-sm overflow-hidden p-3 hover:bg-gray-50 transition-all min-h-[90px]"
+                >
+                  <img
+                    src={imgSrc}
+                    alt={product.name}
+                    className="w-16 h-16 object-cover rounded-lg mr-4 flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm truncate">
+                      {product.name}
+                    </h3>
+                    <div className="flex flex-wrap gap-2 items-center mt-1">
+                      <span className="text-gray-600 text-xs">
+                        {product.price} ₺
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        Stok: {product.stock}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex space-x-2 mt-4">
+                  <div className="flex flex-col gap-1 ml-4">
                     <button
                       onClick={() => openEditProductModal(product)}
-                      className="flex-1 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
+                      className="px-3 py-1 bg-black text-white rounded-lg hover:bg-gray-800 text-xs"
                     >
                       Düzenle
                     </button>
                     <button
                       onClick={() => onDeleteProduct(product._id)}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-800"
+                      className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-800 text-xs"
                     >
                       Sil
                     </button>
                   </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })
+          )}
+        </div>
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-6 space-x-2">
+            {Array.from({ length: totalPages }).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setPage(idx)}
+                className={`w-8 h-8 rounded-full border text-sm font-medium ${
+                  page === idx
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                {idx + 1}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 

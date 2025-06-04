@@ -1,47 +1,61 @@
-# 🛒 Ecommerce Projesi
+# 🛒 E-Ticaret Yönetim Paneli
 
-Modern ve mobil uyumlu bir e-ticaret platformu. Kullanıcılar ürünleri inceleyebilir, filtreleyebilir, sepete ekleyebilir, favorilere alabilir ve güvenli şekilde alışveriş yapabilir. Admin paneli ile ürün, kategori ve sipariş yönetimi kolayca yapılır.
-
-## 📑 İçindekiler
-
-- [Özellikler](#özellikler)
-- [Teknolojiler](#teknolojiler)
-- [Kurulum](#kurulum)
-- [Kullanım](#kullanım)
-- [API Dökümantasyonu](#api-dökümantasyonu)
-- [Veritabanı Şeması](#veritabanı-şeması)
-- [Ekran Görüntüleri](#ekran-görüntüleri)
-- [Katkı Sağlama](#katkı-sağlama)
-- [Lisans](#lisans)
+Modern, güvenli ve kullanıcı dostu bir e-ticaret platformu. Hem müşteriler hem de yöneticiler için eksiksiz alışveriş ve yönetim deneyimi sunar.
 
 ## 🚀 Özellikler
 
-- Kullanıcı kayıt ve giriş (JWT ile)
-- Admin paneli
-- Ürün, kategori, koleksiyon CRUD işlemleri
-- Sepet ve favori yönetimi
-- Yorum ve beğeni sistemi
-- Filtreleme ve arama
-- Mobil uyumlu ve modern tasarım
+- **Sipariş & Fatura Yönetimi:**
 
-## 🛠 Teknolojiler
+  - Sipariş ve fatura işlemleri, e-posta bildirimleri
+  - HTTP-only cookie ile güvenli fatura
+  - Türkçe sipariş durumları, badge ve renkli etiketler
+  - Anlık güncellenen dashboard ve sipariş listeleri
 
-**Frontend:**
+- **Ürün Yönetimi:**
 
-- React.js
-- Tailwind CSS
-- Axios
-- Context API / Zustand
+  - Modern, kompakt, iki sütunlu ürün kartları
+  - Sayfalama (pagination) ile hızlı gezinme
+  - Dashboard'da slider ile en çok satanlar
 
-**Backend:**
+- **Dashboard & Görsel İyileştirmeler:**
 
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT & Bcrypt
+  - Modern kutu ve kaydırma tasarımları
+  - İçerik yoksa bilgilendirici mesajlar
+  - Son siparişlerde limit ve yatay kaydırma
 
-## ⚙️ Kurulum
+- **Müşteri Yönetimi:**
+
+  - Pagination ile müşteri listesi
+
+- **Sepet & Varyant/Beden:**
+
+  - Sepete beden zorunlu, varyant stok güncelleme
+  - Sepet item'ı `{ product, quantity, price, size }`
+  - Spinnerlı sayaç, beden bazlı silme
+
+- **Kargo Limiti & Ücreti:**
+
+  - Kargo limiti ve ücreti admin panelinden anlık ayarlanabilir
+  - Sepet limiti ve kargo ücreti dinamik, özet kutusunda gösterim
+
+- **Mail & Bildirim:**
+
+  - Tek sendEmail fonksiyonu, SMTP ayarları koddan veya isteğe göre
+  - Tüm mail gönderimleri güncel
+  - Başarılı işlem ve hata bildirimleri (toast)
+
+- **Genel UX & Performans:**
+  - Ortak util fonksiyonları, gereksiz render azaltma
+  - Hızlı ve anlık güncellemeler
+  - Mobil uyumlu, modern arayüz
+
+## 🛠️ Kullanılan Teknolojiler
+
+- **Frontend:** React.js, TailwindCSS, Axios, Context API/Zustand
+- **Backend:** Node.js, Express.js, MongoDB, Mongoose, JWT, Bcrypt
+- **Mail:** Nodemailer
+
+## ⚡ Kurulum
 
 ### 1. Projeyi Klonla
 
@@ -67,24 +81,15 @@ npm install
 npm start
 ```
 
-## ▶️ Kullanım
+## 📸 Ekran Görüntüleri
 
-- `localhost:3000` üzerinden frontend arayüzüne erişebilirsin.
-- `localhost:5000` üzerinden backend API çalışır.
+> Tüm ekran görüntüleri `Screenshots` klasöründe yer almaktadır.
 
-## 📚 API Dökümantasyonu
+## 📚 API & Veritabanı
 
 - Tüm endpointler için: `backend/routes/` klasörüne bakabilirsin.
 - JWT ile korunan endpointler ve örnek istekler için Postman koleksiyonu eklenebilir.
-
-## 🗄️ Veritabanı Şeması
-
-- Kullanıcılar, Ürünler, Kategoriler, Siparişler, Yorumlar, Favoriler koleksiyonları.
-- Detaylı şema için: `backend/models/` klasörüne bakabilirsin.
-
-## 🖼️ Ekran Görüntüleri
-
-Screenshots klasörü içinde
+- Veritabanı şemaları: `backend/models/` klasöründe.
 
 ## 🤝 Katkı Sağlama
 

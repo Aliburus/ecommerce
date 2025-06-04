@@ -21,9 +21,9 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const addToCart = async (productId, quantity) => {
+  const addToCart = async (productId, quantity, size) => {
     try {
-      const data = await cartService.addToCart(productId, quantity);
+      const data = await cartService.addToCart(productId, quantity, size);
       await fetchCart();
       return { success: true };
     } catch (err) {
@@ -34,9 +34,9 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const updateCartItem = async (productId, quantity) => {
+  const updateCartItem = async (productId, quantity, size) => {
     try {
-      const data = await cartService.updateCartItem(productId, quantity);
+      const data = await cartService.updateCartItem(productId, quantity, size);
       await fetchCart();
       return { success: true };
     } catch (err) {
@@ -47,10 +47,10 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const removeFromCart = async (productId) => {
+  const removeFromCart = async (productId, size) => {
     try {
-      const data = await cartService.removeFromCart(productId);
-      setCart(data.cart);
+      await cartService.removeFromCart(productId, size);
+      await fetchCart();
       return { success: true };
     } catch (err) {
       setError(

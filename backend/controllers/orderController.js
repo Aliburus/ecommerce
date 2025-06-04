@@ -2,9 +2,10 @@ const Order = require("../models/orderModel");
 const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
 const AdminSettings = require("../models/adminSettingsModel");
-const sendMail = require("../utils/sendMail");
+const sendEmail = require("../utils/sendEmail");
 const User = require("../models/userModel");
 const Category = require("../models/categoryModel");
+const fetch = require("node-fetch");
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -17,7 +18,7 @@ const createOrder = asyncHandler(async (req, res) => {
     throw new Error("Sipariş öğeleri bulunamadı");
   }
 
-  // Calculate total amount and update stock
+  // Calculate total amount and update stockvaryan
   let totalAmount = 0;
   for (const item of items) {
     const product = await Product.findById(item.product);
@@ -25,16 +26,25 @@ const createOrder = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error(`Ürün bulunamadı: ${item.product}`);
     }
-    if (product.stock < item.quantity) {
+    if (!item.size || !Array.isArray(product.variants)) {
       res.status(400);
-      throw new Error(`Yetersiz stok: ${product.name}`);
+      throw new Error(`Beden seçilmek zorunda: ${product.name}`);
     }
+    const variantIndex = product.variants.findIndex(
+      (v) => v.size === item.size
+    );
+    if (variantIndex === -1) {
+      res.status(400);
+      throw new Error(`Seçilen beden bulunamadı: ${item.size}`);
+    }
+    if (product.variants[variantIndex].stock < item.quantity) {
+      res.status(400);
+      throw new Error(`Yetersiz stok: ${product.name} (${item.size})`);
+    }
+    product.variants[variantIndex].stock -= item.quantity;
     totalAmount += product.price * item.quantity;
-    product.stock -= item.quantity;
-    // Ürün satış adedini artır
     product.soldCount = (product.soldCount || 0) + item.quantity;
     await product.save();
-    // Kategori satış adedini artır
     if (product.category) {
       await Category.findByIdAndUpdate(product.category, {
         $inc: { soldCount: item.quantity },
@@ -48,26 +58,29 @@ const createOrder = asyncHandler(async (req, res) => {
     totalAmount,
     shippingAddress,
     paymentMethod,
+    status: "pending",
   });
 
   const createdOrder = await order.save();
+
+  // Admin'e bildirim gönder
   try {
-    // Bildirim gönder
-    const adminSettings = await AdminSettings.findOne();
-    if (
-      adminSettings &&
-      adminSettings.notificationSettings.newOrder &&
-      adminSettings.contactEmail
-    ) {
-      await sendMail(
-        adminSettings.contactEmail,
-        "Yeni Sipariş",
-        "Sistemde yeni bir sipariş oluşturuldu."
-      );
+    const adminUsers = await User.find({ isAdmin: true });
+    for (const admin of adminUsers) {
+      if (admin.email) {
+        await sendEmail({
+          to: admin.email,
+          subject: "Yeni Sipariş Bildirimi",
+          text: `Yeni bir sipariş oluşturuldu.\n\nSipariş No: ${createdOrder._id
+            .toString()
+            .slice(-6)}\nToplam Tutar: ${totalAmount} TL`,
+        });
+      }
     }
   } catch (error) {
-    console.error("Bildirim gönderimi hatası:", error);
+    console.error("Admin bildirim hatası:", error);
   }
+
   res.status(201).json(createdOrder);
 });
 
@@ -111,70 +124,65 @@ const getOrderById = asyncHandler(async (req, res) => {
 // @route   PUT /api/orders/:id/status
 // @access  Private/Admin
 const updateOrderStatus = asyncHandler(async (req, res) => {
-  const { status, note } = req.body;
+  const { status } = req.body;
 
-  const order = await Order.findById(req.params.id)
-    .populate("user", "email name")
-    .lean();
+  const order = await Order.findById(req.params.id).populate(
+    "user",
+    "name email"
+  );
 
   if (!order) {
     res.status(404);
     throw new Error("Sipariş bulunamadı");
   }
 
-  // Durum geçmişine ekle
-  const updatedOrder = await Order.findByIdAndUpdate(
-    req.params.id,
-    {
-      $set: { status },
-      $push: {
-        statusHistory: {
-          status,
-          date: new Date(),
-          note: note || `${status} durumuna güncellendi`,
-        },
-      },
-    },
-    { new: true }
-  ).populate("user", "email name");
+  order.status = status;
+  const updatedOrder = await order.save();
 
-  // Bildirim gönder
-  try {
-    const adminSettings = await AdminSettings.findOne().lean();
-    if (adminSettings && adminSettings.notificationSettings.newOrder) {
-      // Admin'e bildirim
-      if (adminSettings.contactEmail) {
-        await sendMail(
-          adminSettings.contactEmail,
-          "Sipariş Durumu Güncellendi",
-          `Sipariş #${order._id
-            .toString()
-            .slice(-6)} durumu "${status}" olarak güncellendi.`
-        );
-      }
-    }
-
-    // Müşteriye bildirim
-    if (order.user.email) {
-      const statusMessages = {
-        processing: "Siparişiniz işleme alındı.",
-        shipped: "Siparişiniz kargoya verildi.",
-        delivered: "Siparişiniz teslim edildi.",
-        cancelled: "Siparişiniz iptal edildi.",
-      };
-
-      const message =
-        statusMessages[status] || "Sipariş durumunuz güncellendi.";
-      await sendMail(
-        order.user.email,
-        "Sipariş Durumu Güncellendi",
-        `Sayın ${order.user.name},\n\n${message}\n\nSipariş No: ${order._id
-          .toString()
-          .slice(-6)}`
+  // Eğer sipariş pending durumuna alındıysa fatura oluştur ve mail gönder
+  if (status === "pending") {
+    try {
+      // Fatura oluştur
+      const response = await fetch(
+        `${process.env.API_URL}/api/invoices/generate/${order._id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: req.headers.cookie,
+          },
+        }
       );
+
+      if (!response.ok) {
+        throw new Error("Fatura oluşturma hatası");
+      }
+
+      const invoice = await response.json();
+
+      // Müşteriye mail ve faturayı gönder
+      if (order.user && order.user.email) {
+        await sendEmail({
+          to: order.user.email,
+          subject: "Siparişiniz Alındı",
+          text: `Sayın ${
+            order.user.name
+          },\n\nSiparişiniz başarıyla alındı.\n\nSipariş No: ${order._id
+            .toString()
+            .slice(-6)}\n\nToplam Tutar: ${
+            order.totalAmount
+          } TL\n\nSiparişiniz en kısa sürede hazırlanıp kargoya verilecektir.\n\nFaturanız ekte yer almaktadır.`,
+          attachments: [
+            {
+              filename: `fatura-${invoice.invoiceNumber}.pdf`,
+              content: invoice.pdfBuffer,
+            },
+          ],
+        });
+      }
+    } catch (error) {
+      console.error("Fatura ve mail gönderme hatası:", error);
     }
-  } catch (error) {
-    console.error("Bildirim gönderme hatası:", error);
   }
 
   res.json(updatedOrder);
@@ -231,25 +239,27 @@ const cancelOrder = asyncHandler(async (req, res) => {
     if (adminSettings && adminSettings.notificationSettings.newOrder) {
       // Admin'e bildirim
       if (adminSettings.contactEmail) {
-        await sendMail(
-          adminSettings.contactEmail,
-          "Sipariş İptal Edildi",
-          `Sipariş #${order._id.slice(-6)} müşteri tarafından iptal edildi.`
-        );
+        await sendEmail({
+          to: adminSettings.contactEmail,
+          subject: "Sipariş İptal Edildi",
+          text: `Sipariş #${order._id.slice(
+            -6
+          )} müşteri tarafından iptal edildi.`,
+        });
       }
     }
 
     // Müşteriye bildirim
     if (order.user.email) {
-      await sendMail(
-        order.user.email,
-        "Siparişiniz İptal Edildi",
-        `Sayın ${
+      await sendEmail({
+        to: order.user.email,
+        subject: "Siparişiniz İptal Edildi",
+        text: `Sayın ${
           order.user.name
         },\n\nSiparişiniz başarıyla iptal edildi.\n\nSipariş No: ${order._id.slice(
           -6
-        )}\n\nİptal edilen ürünlerin bedeli en kısa sürede iade edilecektir.`
-      );
+        )}\n\nİptal edilen ürünlerin bedeli en kısa sürede iade edilecektir.`,
+      });
     }
   } catch (error) {
     console.error("Bildirim gönderme hatası:", error);

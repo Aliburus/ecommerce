@@ -2,9 +2,9 @@ const Invoice = require("../models/invoiceModel");
 const Order = require("../models/orderModel");
 const User = require("../models/userModel");
 const Product = require("../models/productModel");
-const cloudinary = require("cloudinary").v2;
 const PDFDocument = require("pdfkit");
 const asyncHandler = require("express-async-handler");
+const sendEmail = require("../utils/sendEmail");
 
 // @desc    Get user invoices
 // @route   GET /api/invoices/my-invoices
@@ -30,7 +30,6 @@ const getInvoiceById = asyncHandler(async (req, res) => {
     throw new Error("Fatura bulunamadı");
   }
 
-  // Check if the invoice belongs to the user or is admin
   if (
     invoice.user._id.toString() !== req.user._id.toString() &&
     !req.user.isAdmin
@@ -84,17 +83,17 @@ const generateInvoice = asyncHandler(async (req, res) => {
       name: item.product.name,
       quantity: item.quantity,
       unitPrice: item.product.price,
-      taxRate: 18, // KDV oranı
+      taxRate: 18,
       taxAmount: item.product.price * item.quantity * 0.18,
       total: item.product.price * item.quantity * 1.18,
     })),
     subtotal: order.totalAmount,
     taxTotal: order.totalAmount * 0.18,
-    shippingCost: 0, // Kargo ücreti varsa eklenebilir
+    shippingCost: 0,
     totalAmount: order.totalAmount * 1.18,
     paymentMethod: order.paymentMethod,
     issueDate: new Date(),
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 gün sonra
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
   // Generate PDF
@@ -104,27 +103,28 @@ const generateInvoice = asyncHandler(async (req, res) => {
   pdfDoc.on("data", (chunk) => pdfChunks.push(chunk));
   pdfDoc.on("end", async () => {
     const pdfBuffer = Buffer.concat(pdfChunks);
+    invoice.pdfBuffer = pdfBuffer;
+    await invoice.save();
 
-    // Upload PDF to Cloudinary
-    const result = await cloudinary.uploader
-      .upload_stream(
-        {
-          resource_type: "raw",
-          folder: "invoices",
-          public_id: `invoice-${invoiceNumber}`,
-        },
-        async (error, result) => {
-          if (error) {
-            console.error("PDF upload error:", error);
-            return;
-          }
+    // Send email with PDF attachment
+    const emailSubject = `Fatura #${invoiceNumber}`;
+    const emailText = `Sayın ${order.user.name},\n\n${invoiceNumber} numaralı faturanız ekte yer almaktadır.\n\nSaygılarımızla,\nLUXE`;
 
-          // Save invoice with PDF URL
-          invoice.pdfUrl = result.secure_url;
-          await invoice.save();
-        }
-      )
-      .end(pdfBuffer);
+    try {
+      await sendEmail({
+        to: order.user.email,
+        subject: emailSubject,
+        text: emailText,
+        attachments: [
+          {
+            filename: `fatura-${invoiceNumber}.pdf`,
+            content: pdfBuffer,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Email gönderme hatası:", error);
+    }
   });
 
   // Add content to PDF
@@ -136,9 +136,9 @@ const generateInvoice = asyncHandler(async (req, res) => {
 
   // Company info
   pdfDoc.text("Firma Bilgileri:");
-  pdfDoc.text("Şirket Adı: Your Company");
-  pdfDoc.text("Adres: Your Address");
-  pdfDoc.text("Vergi No: Your Tax Number");
+  pdfDoc.text("Şirket Adı: LUXE");
+  pdfDoc.text("Adres: İstanbul, Türkiye");
+  pdfDoc.text("Vergi No: 1234567890");
   pdfDoc.moveDown();
 
   // Customer info
@@ -206,7 +206,6 @@ const downloadInvoicePDF = asyncHandler(async (req, res) => {
     throw new Error("Fatura bulunamadı");
   }
 
-  // Check if the invoice belongs to the user or is admin
   if (
     invoice.user.toString() !== req.user._id.toString() &&
     !req.user.isAdmin
@@ -215,12 +214,17 @@ const downloadInvoicePDF = asyncHandler(async (req, res) => {
     throw new Error("Bu faturayı indirme yetkiniz yok");
   }
 
-  if (!invoice.pdfUrl) {
+  if (!invoice.pdfBuffer) {
     res.status(404);
     throw new Error("Fatura PDF'i bulunamadı");
   }
 
-  res.json({ pdfUrl: invoice.pdfUrl });
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=fatura-${invoice.invoiceNumber}.pdf`
+  );
+  res.send(invoice.pdfBuffer);
 });
 
 // @desc    Get all invoices

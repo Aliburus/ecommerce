@@ -14,6 +14,7 @@ import Products from "../../components/admin/Products";
 import Collections from "../../components/admin/Collections";
 import Customers from "../../components/admin/Customers";
 import SettingsPage from "../../components/admin/Settings";
+import { toast } from "react-hot-toast";
 
 import {
   getCollections,
@@ -163,11 +164,18 @@ function Admin() {
   };
 
   const handleStoreSave = async () => {
-    await updateAdminSettings(
-      adminSettings.notificationSettings,
-      adminSettings.storeName,
-      adminSettings.contactEmail
-    );
+    try {
+      await updateAdminSettings(
+        adminSettings.notificationSettings,
+        adminSettings.storeName,
+        adminSettings.contactEmail,
+        adminSettings.shippingLimit,
+        adminSettings.shippingFee
+      );
+      toast.success("Ayarlar başarıyla güncellendi");
+    } catch (error) {
+      toast.error("Ayarlar güncellenirken bir hata oluştu");
+    }
   };
 
   const handleDeleteProduct = async (productId) => {

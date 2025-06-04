@@ -3,7 +3,7 @@ const asyncHandler = require("express-async-handler");
 const path = require("path");
 const fs = require("fs");
 const AdminSettings = require("../models/adminSettingsModel");
-const sendMail = require("../utils/sendMail");
+const sendEmail = require("../utils/sendEmail");
 
 // @desc    Get all products
 // @route   GET /api/products
@@ -247,11 +247,11 @@ const updateProduct = asyncHandler(async (req, res) => {
             const variantList = lowStockVariants
               .map((v) => `${v.size}: ${v.stock} adet`)
               .join("\n");
-            await sendMail(
-              adminSettings.contactEmail,
-              `Kritik Stok Uyarısı: ${name}`,
-              `Aşağıdaki varyantların stoğu kritik seviyede (10'un altında):\n${variantList}`
-            );
+            await sendEmail({
+              to: adminSettings.contactEmail,
+              subject: `Kritik Stok Uyarısı: ${name}`,
+              text: `Aşağıdaki varyantların stoğu kritik seviyede (10'un altında):\n${variantList}`,
+            });
           }
         } catch (err) {
           console.error("Kritik stok maili gönderilemedi:", err);

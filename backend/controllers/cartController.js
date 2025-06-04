@@ -27,7 +27,7 @@ const getCart = asyncHandler(async (req, res) => {
 // @access  Private
 const addToCart = asyncHandler(async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, size } = req.body;
     const userId = req.user._id;
 
     const product = await Product.findById(productId);
@@ -42,7 +42,7 @@ const addToCart = asyncHandler(async (req, res) => {
     }
 
     const existingItem = cart.items.find(
-      (item) => item.product.toString() === productId
+      (item) => item.product.toString() === productId && item.size === size
     );
 
     if (existingItem) {
@@ -52,6 +52,7 @@ const addToCart = asyncHandler(async (req, res) => {
         product: productId,
         quantity,
         price: product.price,
+        size: size || null,
       });
     }
 
@@ -74,7 +75,7 @@ const addToCart = asyncHandler(async (req, res) => {
 // @access  Private
 const updateCartItem = asyncHandler(async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, size } = req.body;
     const cart = await Cart.findOne({ user: req.user._id });
 
     if (!cart) {
@@ -82,10 +83,31 @@ const updateCartItem = asyncHandler(async (req, res) => {
     }
 
     const item = cart.items.find(
-      (item) => item.product.toString() === productId
+      (item) => item.product.toString() === productId && item.size === size
     );
     if (!item) {
       return res.status(404).json({ message: "Ürün sepette bulunamadı" });
+    }
+
+    // Varyant stok kontrolü ve güncelleme
+    const product = await Product.findById(productId);
+    if (size && Array.isArray(product.variants)) {
+      const variantIndex = product.variants.findIndex((v) => v.size === size);
+      if (variantIndex === -1) {
+        return res.status(400).json({ message: "Seçilen beden bulunamadı" });
+      }
+      // Stok değişimini hesapla
+      const diff = quantity - item.quantity;
+      if (product.variants[variantIndex].stock < diff) {
+        return res.status(400).json({ message: "Yetersiz stok (beden)" });
+      }
+      product.variants[variantIndex].stock -= diff;
+      await product.save();
+    } else if (product.stock < quantity - item.quantity) {
+      return res.status(400).json({ message: "Yetersiz stok" });
+    } else {
+      product.stock -= quantity - item.quantity;
+      await product.save();
     }
 
     item.quantity = quantity;
@@ -109,6 +131,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
 const removeFromCart = asyncHandler(async (req, res) => {
   try {
     const { productId } = req.params;
+    const { size } = req.query;
     const cart = await Cart.findOne({ user: req.user._id });
 
     if (!cart) {
@@ -116,7 +139,7 @@ const removeFromCart = asyncHandler(async (req, res) => {
     }
 
     cart.items = cart.items.filter(
-      (item) => item.product.toString() !== productId
+      (item) => !(item.product.toString() === productId && item.size === size)
     );
     cart.totalAmount = cart.items.reduce(
       (total, item) => total + item.price * item.quantity,

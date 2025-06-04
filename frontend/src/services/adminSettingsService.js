@@ -11,11 +11,19 @@ export const getAdminSettings = async () => {
 export const updateAdminSettings = async (
   notificationSettings,
   storeName,
-  contactEmail
+  contactEmail,
+  shippingLimit,
+  shippingFee
 ) => {
   const res = await axios.put(
     `${API_URL}/api/admin-settings`,
-    { notificationSettings, storeName, contactEmail },
+    {
+      notificationSettings,
+      storeName,
+      contactEmail,
+      shippingLimit,
+      shippingFee,
+    },
     { withCredentials: true }
   );
   return res.data;
