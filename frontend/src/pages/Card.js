@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { getAdminSettings } from "../services/adminSettingsService";
+import ProductRecommendations from "../components/ProductRecommendations";
 
 function Card() {
   const { cart, error, updateCartItem, removeFromCart, loading } = useCart();
@@ -16,6 +17,17 @@ function Card() {
   const [adminSettings, setAdminSettings] = useState({
     shippingLimit: 500,
     shippingFee: 49.9,
+  });
+
+  // İndirim kodu
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountResult, setDiscountResult] = useState(null);
+  const [discountError, setDiscountError] = useState("");
+  const [discountLoading, setDiscountLoading] = useState(false);
+
+  const [categoryDiscount, setCategoryDiscount] = useState({
+    totalDiscount: 0,
+    appliedDiscounts: [],
   });
 
   useEffect(() => {
@@ -79,6 +91,8 @@ function Card() {
   const FREE_SHIPPING_LIMIT = adminSettings.shippingLimit || 500;
   const SHIPPING_FEE = adminSettings.shippingFee || 49.9;
   const subtotal = localCart?.totalAmount || 0;
+  const totalDiscount = categoryDiscount.totalDiscount || 0;
+  const discountedSubtotal = subtotal - totalDiscount;
   const remaining = Math.max(0, FREE_SHIPPING_LIMIT - subtotal);
   const progress = Math.min(100, (subtotal / FREE_SHIPPING_LIMIT) * 100);
   const isFreeShipping = subtotal >= FREE_SHIPPING_LIMIT;
@@ -86,6 +100,61 @@ function Card() {
 
   // Not ekleme
   const [note, setNote] = useState("");
+
+  const handleDiscountCheck = async () => {
+    setDiscountLoading(true);
+    setDiscountError("");
+    setDiscountResult(null);
+    try {
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/discounts/validate`,
+        { code: discountCode, totalAmount: subtotal },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setDiscountResult(data);
+    } catch (err) {
+      console.error("İndirim kodu hatası:", err);
+      setDiscountError(
+        err.response?.data?.message || "İndirim kodu geçersiz veya hata oluştu"
+      );
+    } finally {
+      setDiscountLoading(false);
+    }
+  };
+
+  // Sepetteki ürünler değiştikçe kategori indirimi uygula
+  useEffect(() => {
+    if (!localCart || !localCart.items) return;
+    const applyCategoryDiscount = async () => {
+      if (!localCart.items.length) {
+        setCategoryDiscount({ totalDiscount: 0, appliedDiscounts: [] });
+        return;
+      }
+      try {
+        const items = localCart.items.map((item) => ({
+          productId: item.product._id,
+          quantity: item.quantity,
+          price: item.price,
+        }));
+        const { data } = await axios.post(
+          `${process.env.REACT_APP_API_URL}/api/discounts/apply-category`,
+          { items },
+          { withCredentials: true }
+        );
+        setCategoryDiscount(data);
+        console.log("SEPETTEKİ ÜRÜNLER:", localCart.items);
+        console.log("BACKENDDEN GELEN KATEGORİ İNDİRİMİ:", data);
+      } catch (err) {
+        setCategoryDiscount({ totalDiscount: 0, appliedDiscounts: [] });
+      }
+    };
+    applyCategoryDiscount();
+  }, [localCart, localCart && localCart.items]);
 
   if (loading && (!localCart || !localCart.items)) return <LoadingSpinner />;
 
@@ -261,11 +330,13 @@ function Card() {
               </div>
               <div className="flex justify-between mb-2 text-sm">
                 <span>İndirim</span>
-                <span>0 TL</span>
+                <span className={totalDiscount > 0 ? "text-green-600" : ""}>
+                  -{totalDiscount} TL
+                </span>
               </div>
               <div className="flex justify-between mb-2 text-sm">
                 <span>Ara Toplam</span>
-                <span>{subtotal} TL</span>
+                <span>{discountedSubtotal} TL</span>
               </div>
               <div className="flex justify-between mb-2 text-sm">
                 <span>Kargo</span>
@@ -275,11 +346,86 @@ function Card() {
               </div>
               <div className="flex justify-between mb-2 text-base font-semibold">
                 <span>Genel Toplam</span>
-                <span>{(subtotal + shippingCost).toFixed(2)} TL</span>
+                <span>{(discountedSubtotal + shippingCost).toFixed(2)} TL</span>
               </div>
               <div className="text-xs text-gray-500 mb-4 mt-2 text-center">
                 Vergi ve kargo ödeme sayfasında hesaplanır
               </div>
+              <div>
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                  <h2 className="text-xl font-semibold mb-4">Sipariş Özeti</h2>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1">
+                      İndirim Kodu
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={discountCode}
+                        onChange={(e) => setDiscountCode(e.target.value)}
+                        className="border rounded px-3 py-2 flex-1"
+                        placeholder="Kodu girin"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleDiscountCheck}
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                        disabled={discountLoading || !discountCode}
+                      >
+                        {discountLoading ? "Kontrol..." : "Uygula"}
+                      </button>
+                    </div>
+                    {discountError && (
+                      <div className="text-red-500 text-sm mt-2">
+                        {discountError}
+                      </div>
+                    )}
+                    {discountResult && (
+                      <div className="text-green-600 text-sm mt-2">
+                        Kod uygulandı! İndirim: {discountResult.discountAmount}{" "}
+                        TL
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span>Ara Toplam</span>
+                    <span>{subtotal} TL</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span>Kargo</span>
+                    <span>
+                      {shippingCost === 0 ? "Ücretsiz" : `${shippingCost} TL`}
+                    </span>
+                  </div>
+                  {discountResult && (
+                    <div className="flex justify-between mb-2 text-green-700 font-semibold">
+                      <span>İndirim</span>
+                      <span>-{discountResult.discountAmount} TL</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
+                    <span>Toplam</span>
+                    <span>
+                      {discountResult
+                        ? subtotal +
+                          shippingCost -
+                          discountResult.discountAmount
+                        : subtotal + shippingCost}{" "}
+                      TL
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {/* Uygulanan kategori indirimlerini göster */}
+              {categoryDiscount.appliedDiscounts?.length > 0 && (
+                <div className="text-xs text-green-700 mt-2">
+                  {categoryDiscount.appliedDiscounts.map((d, i) => (
+                    <div key={i}>
+                      {d.category}: -{d.amount} TL
+                    </div>
+                  ))}
+                </div>
+              )}
               <button
                 onClick={() => navigate("/odeme")}
                 className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors text-base font-semibold"
@@ -288,6 +434,9 @@ function Card() {
               </button>
             </div>
           </div>
+        </div>
+        <div className="mt-8">
+          <ProductRecommendations />
         </div>
       </div>
     </div>

@@ -22,6 +22,9 @@ const adminRoutes = require("./routes/adminRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
 const adminSettingsRoutes = require("./routes/adminSettingsRoutes");
 const heroRoutes = require("./routes/heroRoutes");
+const recommendationRoutes = require("./routes/recommendationRoutes");
+const emailCampaignRoutes = require("./routes/emailCampaignRoutes");
+const discountRoutes = require("./routes/discountRoutes");
 
 dotenv.config();
 const app = express();
@@ -48,36 +51,6 @@ app.use(
   })
 );
 
-// Test upload endpoint
-app.post("/api/test-upload", async (req, res) => {
-  try {
-    if (!req.files || !req.files.image) {
-      return res.status(400).json({ message: "Lütfen bir resim yükleyin" });
-    }
-
-    const uploadDir = path.join(__dirname, "uploads/test");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    const fileName = `${Date.now()}-${req.files.image.name}`;
-    const filePath = path.join(uploadDir, fileName);
-
-    await req.files.image.mv(filePath);
-
-    res.json({
-      message: "Upload başarılı",
-      url: `/uploads/test/${fileName}`,
-    });
-  } catch (error) {
-    console.error("Upload hatası:", error);
-    res.status(500).json({
-      message: "Upload başarısız",
-      error: error.message,
-    });
-  }
-});
-
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
@@ -91,6 +64,9 @@ app.use("/api/admins", adminRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/admin-settings", adminSettingsRoutes);
 app.use("/api/hero", heroRoutes);
+app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/email-campaigns", emailCampaignRoutes);
+app.use("/api/discounts", discountRoutes);
 
 // Static uploads
 const uploadsPath = path.join(__dirname, "uploads");

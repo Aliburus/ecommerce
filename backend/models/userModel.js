@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, "Lütfen isim giriniz"],
     },
     surname: {
       type: String,
@@ -13,20 +13,36 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Lütfen email giriniz"],
       unique: true,
-      lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        "Lütfen geçerli bir email giriniz",
+      ],
     },
     password: {
       type: String,
-      required: true,
-      minlength: 6,
+      required: [true, "Lütfen şifre giriniz"],
+      minlength: [6, "Şifre en az 6 karakter olmalıdır"],
+      select: false,
     },
     isAdmin: {
       type: Boolean,
       default: false,
     },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
+    usedDiscounts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Discount",
+      },
+    ],
   },
   { timestamps: true }
 );

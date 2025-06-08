@@ -6,6 +6,8 @@ import {
   ShoppingBag,
   Settings,
   BarChart,
+  Mail,
+  Percent,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Dashboard from "../../components/admin/Dashboard";
@@ -14,12 +16,13 @@ import Products from "../../components/admin/Products";
 import Collections from "../../components/admin/Collections";
 import Customers from "../../components/admin/Customers";
 import SettingsPage from "../../components/admin/Settings";
+import EmailCampaings from "../../components/admin/EmailCampaings";
+import Discounts from "../../components/admin/Discounts";
 import { toast } from "react-hot-toast";
 
 import {
   getCollections,
   createCollection,
-  addProductToCollection,
   deleteCollection,
   updateCollection,
 } from "../../services/collectionService";
@@ -227,8 +230,14 @@ function Admin() {
     { id: "products", icon: ShoppingBag, label: "Ürünler" },
     { id: "collections", icon: BarChart, label: "Koleksiyonlar" },
     { id: "customers", icon: Users, label: "Müşteriler" },
+    { id: "discounts", icon: Percent, label: "İndirimler" },
+    { id: "campaigns", icon: Mail, label: "Email Kampanyaları" },
     { id: "settings", icon: Settings, label: "Ayarlar" },
   ];
+
+  const handleMenuClick = (id) => {
+    setActiveTab(id);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -247,10 +256,8 @@ function Admin() {
           <Products
             products={products}
             categories={categories}
-            onAddProduct={createProduct}
-            onEditProduct={handleUpdateProduct}
-            onDeleteProduct={handleDeleteProduct}
-            fetchProducts={fetchProducts}
+            onDelete={handleDeleteProduct}
+            onUpdate={handleUpdateProduct}
           />
         );
       case "collections":
@@ -258,21 +265,23 @@ function Admin() {
           <Collections
             collections={collections}
             products={products}
-            onAddCollection={createCollection}
-            onEditCollection={updateCollection}
-            onDeleteCollection={handleDeleteCollection}
+            onDelete={handleDeleteCollection}
           />
         );
       case "customers":
         return <Customers users={users} orders={orders} />;
+      case "discounts":
+        return <Discounts />;
+      case "campaigns":
+        return <EmailCampaings />;
       case "settings":
         return (
           <SettingsPage
-            adminSettings={adminSettings}
-            settingsLoading={settingsLoading}
-            onSettingsSwitch={handleSettingsSwitch}
-            onStoreInputChange={handleStoreInputChange}
-            onStoreSave={handleStoreSave}
+            settings={adminSettings}
+            loading={settingsLoading}
+            onSwitch={handleSettingsSwitch}
+            onInputChange={handleStoreInputChange}
+            onSave={handleStoreSave}
           />
         );
       default:
@@ -294,7 +303,7 @@ function Admin() {
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => handleMenuClick(item.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                   activeTab === item.id
                     ? "bg-gray-100 text-black"

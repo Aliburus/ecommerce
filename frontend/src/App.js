@@ -14,7 +14,6 @@ import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
 import Card from "./pages/Card";
 import Admin from "./pages/admin/Admin";
-
 import Men from "./pages/Men";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -80,11 +79,8 @@ function App() {
                 <main className="flex-grow min-h-screen">
                   <Routes>
                     <Route path="/" element={<Home />} />
-
                     <Route path="/about" element={<About />} />
-
                     <Route path="/men" element={<Men />} />
-
                     <Route path="/koleksiyonlar" element={<Collections />} />
                     <Route
                       path="/koleksiyonlar/:id"

@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { getAdminSettings } from "../services/adminSettingsService";
+import ProductRecommendations from "../components/ProductRecommendations";
 
 // Placeholder bileşenler
 const ProductGallery = ({ images }) => {
@@ -423,6 +424,8 @@ const ProductDetail = () => {
             <ProductDetails product={product} />
           </div>
         </div>
+        {/* Öneriler */}
+        <ProductRecommendations />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { addInteraction } from "./recommendationService";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -8,6 +9,8 @@ const addToCart = async (productId, quantity, size) => {
     { productId, quantity, size },
     { withCredentials: true }
   );
+  // Öneri sistemi için etkileşimi kaydet
+  await addInteraction(productId, "cart");
   return response.data;
 };
 
