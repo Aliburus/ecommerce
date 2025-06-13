@@ -8,11 +8,21 @@ export const getUsers = async () => {
   return res.data;
 };
 
-export const changePassword = async (currentPassword, newPassword) => {
-  const res = await axios.put(
-    `${API_URL}/api/user/change-password`,
-    { currentPassword, newPassword },
-    { withCredentials: true }
-  );
+export const getProfile = async () => {
+  const res = await axios.get("/api/user/profile", { withCredentials: true });
+  return res.data;
+};
+
+export const updateProfile = async (data) => {
+  const res = await axios.put("/api/user/profile", data, {
+    withCredentials: true,
+  });
+  return res.data;
+};
+
+export const changePassword = async (data) => {
+  const res = await axios.put("/api/user/change-password", data, {
+    withCredentials: true,
+  });
   return res.data;
 };

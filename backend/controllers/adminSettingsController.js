@@ -3,11 +3,10 @@ const AdminSettings = require("../models/adminSettingsModel");
 // Admin ayarlarını getir
 exports.getAdminSettings = async (req, res) => {
   try {
-    let settings = await AdminSettings.findOne({ admin: req.user._id });
+    let settings = await AdminSettings.findOne();
     if (!settings) {
       settings = await AdminSettings.create({
-        admin: req.user._id,
-        contactEmail: req.user.email,
+        contactEmail: "info@site.com",
       });
     }
     res.json(settings);
@@ -27,7 +26,7 @@ exports.updateAdminSettings = async (req, res) => {
       shippingFee,
     } = req.body;
     let settings = await AdminSettings.findOneAndUpdate(
-      { admin: req.user._id },
+      {},
       {
         $set: {
           notificationSettings,

@@ -65,9 +65,7 @@ function Navbar() {
           >
             Koleksiyonlar
           </Link>
-          <span className="text-sm text-gray-400 font-medium cursor-not-allowed select-none">
-            Blog
-          </span>
+
           <Link
             to="/about"
             className="text-sm text-gray-700 hover:text-black font-medium"
@@ -103,7 +101,7 @@ function Navbar() {
             )}
           </Link>
           <Link
-            to={user ? "/profile" : "/login"}
+            to={user ? "/users/profile" : "/login"}
             className="p-2 hover:bg-gray-100 rounded-full"
           >
             <User className="h-5 w-5 text-gray-700" />

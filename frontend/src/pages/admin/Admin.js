@@ -277,11 +277,11 @@ function Admin() {
       case "settings":
         return (
           <SettingsPage
-            settings={adminSettings}
-            loading={settingsLoading}
-            onSwitch={handleSettingsSwitch}
-            onInputChange={handleStoreInputChange}
-            onSave={handleStoreSave}
+            adminSettings={adminSettings}
+            settingsLoading={settingsLoading}
+            onSettingsSwitch={handleSettingsSwitch}
+            onStoreInputChange={handleStoreInputChange}
+            onStoreSave={handleStoreSave}
           />
         );
       default:

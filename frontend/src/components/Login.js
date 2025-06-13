@@ -66,9 +66,10 @@ const Login = () => {
       await login(formData.email, formData.password);
       navigate(from, { replace: true });
     } catch (error) {
+      const defaultMsg =
+        "Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.";
       setErrors({
-        submit:
-          error.response?.data?.message || "Giriş yapılırken bir hata oluştu",
+        submit: error?.response?.data?.message || error?.message || defaultMsg,
       });
     } finally {
       setLoading(false);

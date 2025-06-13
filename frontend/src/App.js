@@ -10,7 +10,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Collections from "./pages/Collections";
 import About from "./pages/About";
-import Profile from "./pages/Profile";
+import Profile from "./pages/users/profile";
 import Wishlist from "./pages/Wishlist";
 import Card from "./pages/Card";
 import Admin from "./pages/admin/Admin";
@@ -86,7 +86,7 @@ function App() {
                       path="/koleksiyonlar/:id"
                       element={<CollectionDetail />}
                     />
-                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/users/profile" element={<Profile />} />
                     <Route path="/urun/:id" element={<ProductDetail />} />
                     <Route
                       path="/wishlist"

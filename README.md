@@ -1,102 +1,138 @@
-# 🛒 E-Ticaret Yönetim Paneli
+# 🛍️ E-Ticaret Yönetim Sistemi
 
-Modern, güvenli ve kullanıcı dostu bir e-ticaret platformu. Hem müşteriler hem de yöneticiler için eksiksiz alışveriş ve yönetim deneyimi sunar.
+Modern, güvenli ve kullanıcı dostu bir e-ticaret çözümü. Müşteriler ve yöneticiler için kapsamlı alışveriş ve yönetim deneyimi.
 
-## 🚀 Özellikler
+## ✨ Temel Özellikler
 
-- **Sipariş & Fatura Yönetimi:**
+### 🔒 Güvenlik & Kimlik Doğrulama
 
-  - Sipariş ve fatura işlemleri, e-posta bildirimleri
-  - HTTP-only cookie ile güvenli fatura
-  - Türkçe sipariş durumları, badge ve renkli etiketler
-  - Anlık güncellenen dashboard ve sipariş listeleri
+- JWT tabanlı güvenli kimlik doğrulama
+- HTTP-only cookie ile güvenli oturum yönetimi
+- Rol tabanlı yetkilendirme sistemi
 
-- **Ürün Yönetimi:**
+### 📦 Ürün Yönetimi
 
-  - Modern, kompakt, iki sütunlu ürün kartları
-  - Sayfalama (pagination) ile hızlı gezinme
-  - Dashboard'da slider ile en çok satanlar
+- Çoklu varyant ve beden desteği
+- Stok takibi ve otomatik güncelleme
+- Kategorize edilmiş ürün listeleme
+- Gelişmiş ürün arama ve filtreleme
 
-- **Dashboard & Görsel İyileştirmeler:**
+### 🛒 Sepet & Sipariş Sistemi
 
-  - Modern kutu ve kaydırma tasarımları
-  - İçerik yoksa bilgilendirici mesajlar
-  - Son siparişlerde limit ve yatay kaydırma
+- Gerçek zamanlı stok kontrolü
+- Varyant/beden bazlı sepet yönetimi
+- Dinamik kargo ücreti hesaplama
+- Sipariş durumu takibi ve bildirimler
 
-- **Müşteri Yönetimi:**
+### 📊 Yönetim Paneli
 
-  - Pagination ile müşteri listesi
+- Gerçek zamanlı satış istatistikleri
+- Sipariş ve fatura yönetimi
+- Müşteri veritabanı yönetimi
+- Stok ve envanter kontrolü
 
-- **Sepet & Varyant/Beden:**
+### 📧 İletişim & Bildirimler
 
-  - Sepete beden zorunlu, varyant stok güncelleme
-  - Sepet item'ı `{ product, quantity, price, size }`
-  - Spinnerlı sayaç, beden bazlı silme
+- SMTP entegrasyonu ile e-posta bildirimleri
+- Sipariş durumu güncellemeleri
+- Otomatik fatura gönderimi
+- Toast bildirimleri ile kullanıcı geri bildirimi
 
-- **Kargo Limiti & Ücreti:**
+## 🛠️ Teknoloji Yığını
 
-  - Kargo limiti ve ücreti admin panelinden anlık ayarlanabilir
-  - Sepet limiti ve kargo ücreti dinamik, özet kutusunda gösterim
+### Frontend
 
-- **Mail & Bildirim:**
+- React.js 18+
+- TailwindCSS
+- Axios
+- Zustand (State Management)
+- React Query
 
-  - Tek sendEmail fonksiyonu, SMTP ayarları koddan veya isteğe göre
-  - Tüm mail gönderimleri güncel
-  - Başarılı işlem ve hata bildirimleri (toast)
+### Backend
 
-- **Genel UX & Performans:**
-  - Ortak util fonksiyonları, gereksiz render azaltma
-  - Hızlı ve anlık güncellemeler
-  - Mobil uyumlu, modern arayüz
+- Node.js
+- Express.js
+- MongoDB & Mongoose
+- JWT & Bcrypt
+- Nodemailer
 
-## 🛠️ Kullanılan Teknolojiler
+## 🚀 Kurulum
 
-- **Frontend:** React.js, TailwindCSS, Axios, Context API/Zustand
-- **Backend:** Node.js, Express.js, MongoDB, Mongoose, JWT, Bcrypt
-- **Mail:** Nodemailer
+### Gereksinimler
 
-## ⚡ Kurulum
+- Node.js 16+
+- MongoDB 4.4+
+- npm veya yarn
 
-### 1. Projeyi Klonla
-
-```bash
-git clone https://github.com/Aliburus/ecommerce.git
-cd ecommerce
-```
-
-### 2. Backend Kurulumu
+### Backend Kurulumu
 
 ```bash
 cd backend
 npm install
-# .env dosyasını oluştur ve gerekli ortam değişkenlerini gir
+cp .env.example .env  # .env dosyasını düzenle
 npm run dev
 ```
 
-### 3. Frontend Kurulumu
+### Frontend Kurulumu
 
 ```bash
-cd ../frontend
+cd frontend
 npm install
 npm start
 ```
 
+## 🔧 Ortam Değişkenleri
+
+```env
+# Backend
+MONGODB_URI=
+JWT_SECRET=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+
+# Frontend
+REACT_APP_API_URL=
+```
+
+## 📚 API Dokümantasyonu
+
+API endpointleri ve kullanım örnekleri için `backend/routes/` klasörüne bakabilirsiniz.
+
+## 🔐 Güvenlik Önlemleri
+
+- HTTP-only cookie kullanımı
+- CORS politikaları
+- Rate limiting
+- Input validasyonu
+- XSS koruması
+
+## 📱 Responsive Tasarım
+
+- Mobil öncelikli yaklaşım
+- TailwindCSS ile responsive grid sistemi
+- Touch-friendly arayüz
+- Cross-browser uyumluluk
+
 ## 📸 Ekran Görüntüleri
 
-> Tüm ekran görüntüleri `Screenshots` klasöründe yer almaktadır.
+> Tüm ekran görüntüleri `screenshots` klasöründe bulunmaktadır.
 
-## 📚 API & Veritabanı
+## 🤝 Katkıda Bulunma
 
-- Tüm endpointler için: `backend/routes/` klasörüne bakabilirsin.
-- JWT ile korunan endpointler ve örnek istekler için Postman koleksiyonu eklenebilir.
-- Veritabanı şemaları: `backend/models/` klasöründe.
-
-## 🤝 Katkı Sağlama
-
-1. Fork'la ve yeni bir branch oluştur.
-2. Değişikliklerini yap ve commit et.
-3. Pull request gönder.
+1. Fork yapın
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add amazing feature'`)
+4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
+5. Pull Request oluşturun
 
 ## 📄 Lisans
 
-MIT
+Tüm Hakları Saklıdır
+
+## 📞 İletişim
+
+Proje Sahibi - [@Aliburus](https://github.com/Aliburus)
+
+Proje Linki: [https://github.com/Aliburus/ecommerce](https://github.com/Aliburus/ecommerce)

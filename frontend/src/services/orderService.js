@@ -34,3 +34,10 @@ export const updateOrderStatus = async (orderId, status, note) => {
   );
   return response.data;
 };
+
+export const getMyOrders = async () => {
+  const res = await axios.get("/api/orders/my-orders", {
+    withCredentials: true,
+  });
+  return res.data;
+};

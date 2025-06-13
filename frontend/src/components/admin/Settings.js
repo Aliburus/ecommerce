@@ -17,6 +17,8 @@ function Settings({
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
 
+  if (!adminSettings) return <div>Yükleniyor...</div>;
+
   const handlePasswordChange = (e) => {
     setPasswordForm({
       ...passwordForm,

@@ -77,29 +77,40 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/login
 // @access  Public
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    console.log("Login isteği:", req.body);
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
 
-  if (user && (await user.matchPassword(password))) {
-    const token = generateToken(user._id);
+    if (user && (await user.matchPassword(password))) {
+      const token = generateToken(user._id);
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      });
 
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-    });
-  } else {
-    res.status(401);
-    throw new Error("Invalid email or password");
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message:
+          "Geçersiz email veya şifre. Lütfen bilgilerinizi kontrol edin.",
+      });
+    }
+  } catch (error) {
+    console.error("Login hata:", error);
+    return res
+      .status(500)
+      .json({ message: "Sunucu hatası", error: error.message });
   }
 });
 

@@ -30,11 +30,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     usedDiscounts: [

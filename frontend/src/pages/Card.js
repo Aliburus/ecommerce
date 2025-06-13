@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { Trash2, Plus, Minus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { getAdminSettings } from "../services/adminSettingsService";
@@ -171,13 +171,13 @@ function Card() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4">
           <h1 className="text-2xl font-bold mb-8">Sepetim</h1>
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="bg-white  shadow-md p-8 text-center">
             <p className="text-gray-600 mb-4">
               Sepetinizde ürün bulunmamaktadır.
             </p>
             <button
-              onClick={() => navigate("/urun")}
-              className="bg-black text-white py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors"
+              onClick={() => navigate("/men")}
+              className="bg-black text-white py-2 px-6  hover:bg-gray-800 transition-colors"
             >
               Alışverişe Başla
             </button>
@@ -191,14 +191,15 @@ function Card() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Ücretsiz kargo barı */}
-        <div className="bg-gray-100 rounded-lg p-4 flex items-center mb-8">
-          <span className="mr-4 text-gray-700 text-sm">
-            🚚{" "}
-            {isFreeShipping
-              ? "Tebrikler! Ücretsiz kargo kazandınız."
-              : `Kargo ücreti ödememek için ${remaining} TL lik ürün alın!`}
-          </span>
-          <div className="flex-1 h-2 bg-white rounded-full overflow-hidden">
+        <div className="bg-gray-100 p-4 flex flex-col gap-2 mb-8 rounded-lg">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm text-black font-medium">
+              {isFreeShipping
+                ? "Tebrikler! Ücretsiz kargo kazandınız."
+                : `Kargo ücreti ödememek için ${remaining} TL'lik ürün alın!`}
+            </span>
+          </div>
+          <div className="w-full h-2 bg-white rounded-full overflow-hidden">
             <div
               className="h-full bg-black rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -208,8 +209,7 @@ function Card() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Sol: Ürünler */}
           <div className="lg:col-span-2">
-            <h1 className="text-3xl font-semibold mb-6">Sepet</h1>
-            <div className="bg-white rounded-lg divide-y divide-gray-100 shadow-md">
+            <div className="bg-white  divide-y divide-gray-100 shadow-md">
               {localCart.items.map((item, idx) => (
                 <div
                   key={item.product._id + (item.size || item.variant || "")}
@@ -217,7 +217,7 @@ function Card() {
                     idx !== localCart.items.length - 1 ? "border-b" : ""
                   }`}
                 >
-                  <div className="w-28 h-36 flex-shrink-0 overflow-hidden bg-gray-100 flex items-center justify-center rounded-md">
+                  <div className="w-28 h-36 flex-shrink-0 overflow-hidden bg-gray-100 flex items-center justify-center ">
                     <img
                       src={`${process.env.REACT_APP_API_URL}${
                         item.product.images?.[0]?.url ||
@@ -229,11 +229,16 @@ function Card() {
                   </div>
                   <div className="sm:ml-6 flex-1 w-full mt-4 sm:mt-0">
                     <div className="font-semibold text-base text-black mb-1 line-clamp-2">
-                      {item.product.name}
+                      <Link
+                        to={`/urun/${item.product._id}`}
+                        className="hover:underline text-blue-600"
+                      >
+                        {item.product.name}
+                      </Link>
                     </div>
                     {item.size && (
                       <div className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                        <span className="px-2 py-0.5 bg-gray-200 rounded border border-gray-300">
+                        <span className="px-2 py-0.5 bg-gray-200  border border-gray-300">
                           Beden: {item.size}
                         </span>
                       </div>
@@ -247,7 +252,7 @@ function Card() {
                             item.size
                           )
                         }
-                        className="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-100"
+                        className="w-8 h-8 border  flex items-center justify-center hover:bg-gray-100"
                         disabled={
                           itemLoading[item.product._id + (item.size || "")]
                         }
@@ -288,7 +293,7 @@ function Card() {
                             item.size
                           )
                         }
-                        className="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-100"
+                        className="w-8 h-8 border  flex items-center justify-center hover:bg-gray-100"
                         disabled={
                           itemLoading[item.product._id + (item.size || "")]
                         }
@@ -315,123 +320,75 @@ function Card() {
           </div>
           {/* Sağ: Sipariş Özeti ve Not */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg p-8 shadow-md flex flex-col gap-4 sticky top-8">
-              <div className="mb-4">
-                <label className="flex items-center gap-2 font-medium text-base mb-2">
-                  Not ekle <span className="text-gray-400 text-xs">✏️</span>
-                </label>
-                <textarea
-                  className="w-full border rounded p-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/20"
-                  rows={2}
-                  placeholder="Satıcıya not yaz..."
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                />
+            <div
+              className="bg-white  p-8 shadow-md flex flex-col gap-4 sticky top-8"
+              style={{ maxHeight: "calc(100vh - 100px)", overflowY: "auto" }}
+            >
+              <h2 className="text-xl font-bold mb-4 text-black">
+                Sipariş Özeti
+              </h2>
+              <div className="flex justify-between mb-2 text-base text-black">
+                <span>Ürünün Toplamı</span>
+                <span>{subtotal} TL</span>
               </div>
-              <div className="flex justify-between mb-2 text-sm">
-                <span>İndirim</span>
-                <span className={totalDiscount > 0 ? "text-green-600" : ""}>
-                  -{totalDiscount} TL
-                </span>
-              </div>
-              <div className="flex justify-between mb-2 text-sm">
-                <span>Ara Toplam</span>
-                <span>{discountedSubtotal} TL</span>
-              </div>
-              <div className="flex justify-between mb-2 text-sm">
-                <span>Kargo</span>
+              <div className="flex justify-between mb-2 text-base text-black">
+                <span>Kargo Toplam</span>
                 <span>
-                  {isFreeShipping ? "Ücretsiz" : `${SHIPPING_FEE} TL`}
+                  {shippingCost === 0 ? (
+                    <span className="font-semibold">Bedava</span>
+                  ) : (
+                    `${shippingCost} TL`
+                  )}
                 </span>
               </div>
-              <div className="flex justify-between mb-2 text-base font-semibold">
-                <span>Genel Toplam</span>
-                <span>{(discountedSubtotal + shippingCost).toFixed(2)} TL</span>
-              </div>
-              <div className="text-xs text-gray-500 mb-4 mt-2 text-center">
-                Vergi ve kargo ödeme sayfasında hesaplanır
-              </div>
-              <div>
-                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                  <h2 className="text-xl font-semibold mb-4">Sipariş Özeti</h2>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">
-                      İndirim Kodu
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={discountCode}
-                        onChange={(e) => setDiscountCode(e.target.value)}
-                        className="border rounded px-3 py-2 flex-1"
-                        placeholder="Kodu girin"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleDiscountCheck}
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                        disabled={discountLoading || !discountCode}
-                      >
-                        {discountLoading ? "Kontrol..." : "Uygula"}
-                      </button>
-                    </div>
-                    {discountError && (
-                      <div className="text-red-500 text-sm mt-2">
-                        {discountError}
-                      </div>
-                    )}
-                    {discountResult && (
-                      <div className="text-green-600 text-sm mt-2">
-                        Kod uygulandı! İndirim: {discountResult.discountAmount}{" "}
-                        TL
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span>Ara Toplam</span>
-                    <span>{subtotal} TL</span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span>Kargo</span>
-                    <span>
-                      {shippingCost === 0 ? "Ücretsiz" : `${shippingCost} TL`}
-                    </span>
-                  </div>
-                  {discountResult && (
-                    <div className="flex justify-between mb-2 text-green-700 font-semibold">
-                      <span>İndirim</span>
-                      <span>-{discountResult.discountAmount} TL</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
-                    <span>Toplam</span>
-                    <span>
-                      {discountResult
-                        ? subtotal +
-                          shippingCost -
-                          discountResult.discountAmount
-                        : subtotal + shippingCost}{" "}
-                      TL
-                    </span>
-                  </div>
-                </div>
-              </div>
-              {/* Uygulanan kategori indirimlerini göster */}
-              {categoryDiscount.appliedDiscounts?.length > 0 && (
-                <div className="text-xs text-green-700 mt-2">
-                  {categoryDiscount.appliedDiscounts.map((d, i) => (
-                    <div key={i}>
-                      {d.category}: -{d.amount} TL
-                    </div>
-                  ))}
+              {totalDiscount > 0 && (
+                <div className="flex justify-between mb-2 text-base text-black">
+                  <span>İndirim</span>
+                  <span>-{totalDiscount} TL</span>
                 </div>
               )}
-              <button
-                onClick={() => navigate("/odeme")}
-                className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors text-base font-semibold"
-              >
-                Ödemeye Geç
+              <div className="border-t pt-4 mt-2 flex justify-between items-center text-lg font-bold text-black">
+                <span>Toplam</span>
+                <span>{(discountedSubtotal + shippingCost).toFixed(2)} TL</span>
+              </div>
+              <button className="mt-6 w-full py-3  bg-black text-white font-semibold text-lg hover:bg-gray-900 transition">
+                Sepeti Onayla
               </button>
+              <div className="mt-4">
+                <label className="block text-sm font-medium mb-1 text-black">
+                  İndirim Kodu
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value)}
+                    className="border  px-3 py-2 flex-1 text-black"
+                    placeholder="Kodu girin"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleDiscountCheck}
+                    className="bg-black text-white px-4 py-2  hover:bg-gray-900"
+                    disabled={discountLoading || !discountCode}
+                  >
+                    {discountLoading ? "Kontrol..." : "Uygula"}
+                  </button>
+                </div>
+                {discountError && (
+                  <div className="text-red-600 text-sm mt-2">
+                    {discountError}
+                  </div>
+                )}
+                {discountResult && (
+                  <div className="text-green-600 text-sm mt-2">
+                    Kod uygulandı! İndirim: {discountResult.discountAmount} TL
+                  </div>
+                )}
+              </div>
+              <div className="text-xs text-gray-500 mt-4 text-center">
+                Vergi ve kargo ödeme sayfasında hesaplanır
+              </div>
             </div>
           </div>
         </div>
