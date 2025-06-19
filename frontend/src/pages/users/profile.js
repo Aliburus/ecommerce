@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from "react";
 import {
   User,
-  Settings,
+  // Settings,
   CreditCard,
   Heart,
   LogOut,
   Package,
   Bell,
   Shield,
+  MapPin,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import ProfileInfo from "../../components/users/ProfileInfo";
 import Orders from "../../components/users/Orders";
-import Payments from "../../components/users/Payments";
-import Favorites from "../../components/users/Favorites";
+
 import Notifications from "../../components/users/Notifications";
-import Security from "../../components/users/Security";
-import SettingsTab from "../../components/users/Settings";
+
+import Addresses from "../../components/users/Addresses";
 import {
   getProfile,
   updateProfile,
@@ -78,11 +78,9 @@ const Profile = () => {
   const menuItems = [
     { id: "profile", icon: User, label: "Profil Bilgileri" },
     { id: "orders", icon: Package, label: "Siparişlerim" },
-    { id: "payments", icon: CreditCard, label: "Ödeme Yöntemlerim" },
-    { id: "favorites", icon: Heart, label: "Favorilerim" },
     { id: "notifications", icon: Bell, label: "Bildirimler" },
-    { id: "security", icon: Shield, label: "Güvenlik" },
-    { id: "settings", icon: Settings, label: "Ayarlar" },
+    // { id: "settings", icon: Settings, label: "Ayarlar" },
+    { id: "addresses", icon: MapPin, label: "Adreslerim" },
   ];
 
   if (loading) return <div>Yükleniyor...</div>;
@@ -152,11 +150,9 @@ const Profile = () => {
               />
             )}
             {activeTab === "orders" && <Orders />}
-            {activeTab === "payments" && <Payments />}
-            {activeTab === "favorites" && <Favorites />}
             {activeTab === "notifications" && <Notifications />}
-            {activeTab === "security" && <Security />}
-            {activeTab === "settings" && <SettingsTab />}
+            {/* {activeTab === "settings" && <SettingsTab />} */}
+            {activeTab === "addresses" && <Addresses />}
           </div>
         </div>
       </div>

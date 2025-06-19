@@ -31,3 +31,10 @@ export const sendCampaign = async (id) => {
   );
   return res.data;
 };
+
+export const getUserCampaigns = async () => {
+  const res = await axios.get(`${API_URL}/api/email-campaigns/user`, {
+    withCredentials: true,
+  });
+  return res.data;
+};

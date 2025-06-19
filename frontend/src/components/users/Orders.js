@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getMyOrders } from "../../services/orderService";
 import { Link } from "react-router-dom";
+import LoadingSpinner from "../LoadingSpinner";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -21,7 +22,7 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  if (loading) return <div>Yükleniyor...</div>;
+  if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (

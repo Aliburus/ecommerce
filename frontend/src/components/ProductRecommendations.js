@@ -49,32 +49,36 @@ const ProductRecommendations = () => {
     return <div className="text-center py-4">Yükleniyor...</div>;
   }
 
-  if (recommendations.length === 0) {
+  if (recommendations.length <= 4) {
     return null;
   }
 
-  const visibleProducts = recommendations.slice(currentSlide, currentSlide + 4);
+  const showSlider = recommendations.length > 4;
+  const visibleProducts = showSlider
+    ? recommendations.slice(currentSlide, currentSlide + 4)
+    : recommendations;
 
   return (
     <div className="mt-8 relative">
       <h2 className="text-2xl font-semibold mb-4">Size Özel Öneriler</h2>
-
       <div className="relative">
         {/* Navigation buttons */}
-        <button
-          onClick={prevSlide}
-          className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg transition-all border border-gray-200"
-        >
-          <ChevronLeft size={24} className="text-gray-600" />
-        </button>
-
-        <button
-          onClick={nextSlide}
-          className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg transition-all border border-gray-200"
-        >
-          <ChevronRight size={24} className="text-gray-600" />
-        </button>
-
+        {showSlider && (
+          <>
+            <button
+              onClick={prevSlide}
+              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg transition-all border border-gray-200"
+            >
+              <ChevronLeft size={24} className="text-gray-600" />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg transition-all border border-gray-200"
+            >
+              <ChevronRight size={24} className="text-gray-600" />
+            </button>
+          </>
+        )}
         {/* Products grid */}
         <div className="grid grid-cols-4 gap-4">
           {visibleProducts.map((product) => (
@@ -103,21 +107,22 @@ const ProductRecommendations = () => {
             </Link>
           ))}
         </div>
-
         {/* Dots indicator */}
-        <div className="flex justify-center mt-6 gap-2">
-          {Array.from({ length: recommendations.length - 3 }).map(
-            (_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  currentSlide === index ? "bg-primary w-6" : "bg-gray-300"
-                }`}
-              />
-            )
-          )}
-        </div>
+        {showSlider && (
+          <div className="flex justify-center mt-6 gap-2">
+            {Array.from({ length: recommendations.length - 3 }).map(
+              (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    currentSlide === index ? "bg-primary w-6" : "bg-gray-300"
+                  }`}
+                />
+              )
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

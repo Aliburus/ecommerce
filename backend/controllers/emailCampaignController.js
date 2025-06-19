@@ -2,6 +2,7 @@ const EmailCampaign = require("../models/emailCampaignModel");
 const User = require("../models/userModel");
 const sendEmail = require("../utils/sendEmail");
 const asyncHandler = require("express-async-handler");
+const mongoose = require("mongoose");
 
 // Kampanya oluştur
 const createCampaign = asyncHandler(async (req, res) => {
@@ -113,9 +114,35 @@ const sendCampaign = asyncHandler(async (req, res) => {
   }
 });
 
+// Kullanıcıya gönderilen kampanyalar
+const getUserCampaigns = asyncHandler(async (req, res) => {
+  try {
+    if (!req.user || !req.user._id) {
+      console.error("getUserCampaigns: Kullanıcı yok veya login değil");
+      return res.status(401).json({ message: "Giriş yapmanız gerekli" });
+    }
+    console.log("getUserCampaigns: user", req.user);
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+    console.log("getUserCampaigns: userId", userId);
+    const campaigns = await EmailCampaign.find({ recipients: userId }).sort({
+      createdAt: -1,
+    });
+    console.log("getUserCampaigns: campaigns", campaigns);
+    res.json(campaigns);
+  } catch (err) {
+    console.error("getUserCampaigns error:", err, err.stack);
+    res.status(500).json({
+      message: "Internal Server Error",
+      error: err.message,
+      stack: err.stack,
+    });
+  }
+});
+
 module.exports = {
   createCampaign,
   getCampaigns,
   getCampaign,
   sendCampaign,
+  getUserCampaigns,
 };
