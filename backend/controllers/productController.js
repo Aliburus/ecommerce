@@ -22,9 +22,14 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
   // Gender filtresi ekle
   const gender = req.query.gender ? { gender: req.query.gender } : {};
+  const category = req.query.category ? { category: req.query.category } : {};
 
-  const count = await Product.countDocuments({ ...keyword, ...gender });
-  const products = await Product.find({ ...keyword, ...gender })
+  const count = await Product.countDocuments({
+    ...keyword,
+    ...gender,
+    ...category,
+  });
+  const products = await Product.find({ ...keyword, ...gender, ...category })
     .populate("category", "name")
     .limit(pageSize)
     .skip(pageSize * (page - 1));
@@ -59,7 +64,7 @@ const getProductById = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, price, description, category, gender } = req.body;
+    const { name, price, description, category, gender, color } = req.body;
 
     // Kategori kontrolü
     if (!category) {
@@ -156,6 +161,7 @@ const createProduct = asyncHandler(async (req, res) => {
       sku,
       stock,
       gender,
+      color,
       images: uploadedImages,
       variants,
     });
@@ -191,13 +197,31 @@ const createProduct = asyncHandler(async (req, res) => {
 const updateProduct = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, category, stock, sku, gender, variants } =
-      req.body;
+    const {
+      name,
+      price,
+      description,
+      category,
+      stock,
+      sku,
+      gender,
+      variants,
+      color,
+    } = req.body;
 
     const product = await Product.findById(id);
     if (!product) {
       return res.status(404).json({ message: "Ürün bulunamadı" });
     }
+
+    product.name = name || product.name;
+    product.price = price || product.price;
+    product.description = description || product.description;
+    product.category = category || product.category;
+    product.stock = stock || product.stock;
+    product.sku = sku || product.sku;
+    product.gender = gender || product.gender;
+    product.color = color || product.color;
 
     // Varyantları işle
     let processedVariants = [];
@@ -229,6 +253,7 @@ const updateProduct = asyncHandler(async (req, res) => {
         stock,
         sku,
         gender,
+        color,
         variants: processedVariants,
         images,
       },

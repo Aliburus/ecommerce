@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { FaCheck } from "react-icons/fa";
+import { getCategoriesWithProducts } from "../services/categoryService";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 const COLOR_MAP = {
@@ -15,16 +16,72 @@ const GENDERS = ["Kadın", "Erkek", "Unisex"];
 
 function FilterBar({ filters, onFilterChange, onReset }) {
   const [open, setOpen] = useState({
-    size: false,
-    gender: false,
     price: false,
+    size: false,
     color: false,
+    category: false,
   });
+  const [categories, setCategories] = useState([]);
 
   const toggle = (key) => setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategoriesWithProducts();
+        setCategories(data);
+      } catch (error) {
+        console.error("Kategoriler yüklenemedi:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const handleCategoryChange = (categoryId) => {
+    onFilterChange("category", categoryId);
+  };
+
   return (
     <aside className="w-full md:w-64 bg-white p-4 border-r border-gray-200">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold ">Filtreler</h2>
+      </div>
+
+      {/* KATEGORİ */}
+      <div className="mb-6">
+        <button
+          className="w-full flex justify-between items-center mb-3"
+          onClick={() => toggle("category")}
+        >
+          <h3 className="font-semibold">KATEGORİ</h3>
+          {open.category ? <IoIosArrowUp /> : <IoIosArrowDown />}
+        </button>
+        {open.category && (
+          <div className="space-y-2">
+            <button
+              key="all"
+              onClick={() => handleCategoryChange("")}
+              className={`block w-full text-left px-2 py-1 rounded ${
+                !filters.category ? "bg-gray-200" : ""
+              }`}
+            >
+              Tümü
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category._id}
+                onClick={() => handleCategoryChange(category._id)}
+                className={`block w-full text-left px-2 py-1 rounded ${
+                  filters.category === category._id ? "bg-gray-200" : ""
+                }`}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* BEDEN */}
       <div className="mb-6">
         <button

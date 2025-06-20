@@ -255,6 +255,32 @@ const applyCategoryDiscounts = asyncHandler(async (req, res) => {
   });
 });
 
+// Kullanıcının kullanabileceği indirimleri getir
+const getUserDiscounts = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const usedDiscounts = user.usedDiscounts || [];
+
+  // Sadece aktif ve daha önce kullanılmamış indirimleri getir, kategori adını da çek
+  const discounts = await Discount.find({
+    isActive: true,
+    _id: { $nin: usedDiscounts },
+  })
+    .populate("categoryId", "name")
+    .sort({ createdAt: -1 });
+
+  res.json(discounts);
+});
+
+// Süresi biten indirimleri pasif yap
+const deactivateExpiredDiscounts = asyncHandler(async (req, res) => {
+  const now = new Date();
+  const result = await Discount.updateMany(
+    { endDate: { $lt: now }, isActive: true },
+    { $set: { isActive: false } }
+  );
+  res.json({ message: `Pasif yapılan indirim: ${result.modifiedCount}` });
+});
+
 module.exports = {
   getDiscounts,
   createDiscount,
@@ -262,4 +288,6 @@ module.exports = {
   deleteDiscount,
   validateDiscountCode,
   applyCategoryDiscounts,
+  getUserDiscounts,
+  deactivateExpiredDiscounts,
 };

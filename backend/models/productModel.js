@@ -19,6 +19,10 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
+    color: {
+      type: String,
+      required: false,
+    },
     gender: {
       type: String,
       enum: ["Kadın", "Erkek", "Unisex"],

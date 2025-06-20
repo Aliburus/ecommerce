@@ -1,34 +1,49 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import LoadingSpinner from "../components/LoadingSpinner";
 import FilterBar from "../components/FilterBar";
 
 function Men() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [wishlist, setWishlist] = useState([]);
+
+  const initialCategory =
+    new URLSearchParams(location.search).get("category") || "";
+
   const [filters, setFilters] = useState({
     priceRange: [0, 5000],
     sizes: [],
     colors: [],
     gender: "",
+    category: initialCategory,
   });
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/products/all`
+        const params = new URLSearchParams();
+        if (filters.category) params.append("category", filters.category);
+        if (filters.gender) params.append("gender", filters.gender);
+        params.append("page", page);
+
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/products?${params.toString()}`
         );
-        setProducts(response.data || []);
-        setLoading(false);
+        setProducts(data.products || []);
+        setPages(data.pages || 1);
       } catch (error) {
         setError(error.message);
+      } finally {
         setLoading(false);
       }
     };
@@ -43,36 +58,7 @@ function Men() {
     };
     fetchProducts();
     fetchWishlist();
-  }, []);
-
-  useEffect(() => {
-    let filtered = [...products];
-
-    // Fiyat filtresi
-    filtered = filtered.filter(
-      (product) =>
-        product.price >= filters.priceRange[0] &&
-        product.price <= filters.priceRange[1]
-    );
-
-    // Beden filtresi
-    if (filters.sizes.length > 0) {
-      filtered = filtered.filter((product) =>
-        product.variants?.some((variant) =>
-          filters.sizes.includes(variant.size)
-        )
-      );
-    }
-
-    // Renk filtresi
-    if (filters.colors.length > 0) {
-      filtered = filtered.filter((product) =>
-        filters.colors.includes(product.color)
-      );
-    }
-
-    setFilteredProducts(filtered);
-  }, [products, filters]);
+  }, [filters.category, filters.gender, page]);
 
   const handleWishlist = async (id) => {
     try {
@@ -88,6 +74,7 @@ function Men() {
   };
 
   const handleFilterChange = (type, value) => {
+    setPage(1);
     setFilters((prev) => ({
       ...prev,
       [type]: value,
@@ -123,12 +110,13 @@ function Men() {
               sizes: [],
               colors: [],
               gender: "",
+              category: initialCategory,
             })
           }
         />
         <div className="flex-1">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8 mb-10">
-            {filteredProducts.map((product) => (
+            {products.map((product) => (
               <div
                 key={product._id}
                 className="group cursor-pointer"
@@ -168,6 +156,25 @@ function Men() {
               </div>
             ))}
           </div>
+
+          {/* Pagination */}
+          {pages > 1 && (
+            <div className="flex justify-center mt-10 space-x-2">
+              {[...Array(pages).keys()].map((p) => (
+                <button
+                  key={p + 1}
+                  onClick={() => setPage(p + 1)}
+                  className={`w-10 h-10 rounded-full border text-sm font-medium ${
+                    page === p + 1
+                      ? "bg-black text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {p + 1}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

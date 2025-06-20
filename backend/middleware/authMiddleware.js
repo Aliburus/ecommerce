@@ -38,7 +38,7 @@ const admin = async (req, res, next) => {
     next();
   } else {
     res.status(401);
-    throw new Error("Admin yetkisi gerekli");
+    return next(new Error("Admin yetkisi gerekli"));
   }
 };
 

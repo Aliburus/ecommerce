@@ -7,6 +7,8 @@ const {
   deleteDiscount,
   validateDiscountCode,
   applyCategoryDiscounts,
+  getUserDiscounts,
+  deactivateExpiredDiscounts,
 } = require("../controllers/discountController");
 const { protect, admin } = require("../middleware/authMiddleware");
 
@@ -25,5 +27,9 @@ router
   .delete(protect, admin, deleteDiscount);
 
 router.post("/apply-category", protect, applyCategoryDiscounts);
+
+router.get("/my-discounts", protect, getUserDiscounts);
+
+router.post("/deactivate-expired", protect, admin, deactivateExpiredDiscounts);
 
 module.exports = router;

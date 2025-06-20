@@ -28,3 +28,8 @@ export const updateAdminSettings = async (
   );
   return res.data;
 };
+
+export const getStoreInfo = async () => {
+  const res = await axios.get(`${API_URL}/api/admin-settings/public`);
+  return res.data;
+};

@@ -43,3 +43,13 @@ exports.updateAdminSettings = async (req, res) => {
     res.status(500).json({ message: "Ayarlar güncellenemedi", error });
   }
 };
+
+// Herkese açık mağaza ismi
+exports.getStoreInfo = async (req, res) => {
+  try {
+    const settings = await AdminSettings.findOne();
+    res.json({ storeName: settings?.storeName || "Fashion" });
+  } catch (error) {
+    res.status(500).json({ message: "Mağaza ismi alınamadı", error });
+  }
+};

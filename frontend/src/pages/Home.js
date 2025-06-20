@@ -3,6 +3,7 @@ import Hero from "../components/sections/Hero";
 import Promotions from "../components/sections/Promotions";
 import FeaturedProducts from "../components/sections/FeaturedProducts";
 import FeaturedCollections from "../components/sections/FeaturedCollections";
+import FeaturedCategories from "../components/sections/FeaturedCategories";
 import Navbar from "../components/Navbar";
 
 function Home() {
@@ -11,6 +12,8 @@ function Home() {
       <Hero />
       <Promotions />
       <FeaturedProducts />
+      <FeaturedCategories />
+
       <FeaturedCollections />
     </div>
   );

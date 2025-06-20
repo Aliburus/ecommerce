@@ -4,8 +4,12 @@ import { Trash2, Plus, Minus } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { getAdminSettings } from "../services/adminSettingsService";
+import {
+  getAdminSettings,
+  getStoreInfo,
+} from "../services/adminSettingsService";
 import ProductRecommendations from "../components/ProductRecommendations";
+import { useAuth } from "../context/AuthContext";
 
 function Card() {
   const { cart, error, updateCartItem, removeFromCart, loading } = useCart();
@@ -30,17 +34,24 @@ function Card() {
     appliedDiscounts: [],
   });
 
+  const { user } = useAuth();
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const settings = await getAdminSettings();
+        let settings;
+        if (user && user.isAdmin) {
+          settings = await getAdminSettings();
+        } else {
+          settings = await getStoreInfo();
+        }
         setAdminSettings(settings);
       } catch (error) {
         console.error("Ayarlar alınamadı:", error);
       }
     };
     fetchSettings();
-  }, []);
+  }, [user]);
 
   React.useEffect(() => {
     setLocalCart(cart);
@@ -147,8 +158,6 @@ function Card() {
           { withCredentials: true }
         );
         setCategoryDiscount(data);
-        console.log("SEPETTEKİ ÜRÜNLER:", localCart.items);
-        console.log("BACKENDDEN GELEN KATEGORİ İNDİRİMİ:", data);
       } catch (err) {
         setCategoryDiscount({ totalDiscount: 0, appliedDiscounts: [] });
       }
@@ -302,7 +311,7 @@ function Card() {
                       </button>
                       <button
                         onClick={() =>
-                          handleRemoveItem(item.product._id, item.size)
+                          handleRemoveItem(item.product._id, item.size || "")
                         }
                         className="ml-4 text-gray-500 hover:text-red-600 flex items-center gap-1"
                       >

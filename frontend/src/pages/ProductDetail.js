@@ -9,7 +9,10 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { getAdminSettings } from "../services/adminSettingsService";
+import {
+  getAdminSettings,
+  getStoreInfo,
+} from "../services/adminSettingsService";
 import ProductRecommendations from "../components/ProductRecommendations";
 
 // Placeholder bileşenler
@@ -31,8 +34,8 @@ const ProductGallery = ({ images }) => {
           flexDirection: "column",
           gap: "8px",
           marginRight: "16px",
-          height: "600px",
-          maxHeight: "600px",
+          height: "540px",
+          maxHeight: "540px",
           overflowY: "auto",
         }}
       >
@@ -42,8 +45,8 @@ const ProductGallery = ({ images }) => {
             src={img}
             alt={`Ürün ${idx + 1}`}
             style={{
-              height: "90px",
-              width: "90px",
+              height: "80px",
+              width: "80px",
               objectFit: "cover",
               cursor: "pointer",
               border: mainImage === img ? "2px solid black" : "1px solid #ccc",
@@ -59,8 +62,8 @@ const ProductGallery = ({ images }) => {
       <div
         className="mb-4"
         style={{
-          width: "400px",
-          height: "600px",
+          width: "360px",
+          height: "540px",
           overflow: "hidden",
           background: "#fff",
         }}
@@ -84,13 +87,13 @@ const ProductGallery = ({ images }) => {
 };
 const SizeSelector = ({ variants, onSelect, selectedSize }) => (
   <div className="my-4">
-    <h3 className="text-sm font-medium mb-2">Beden Seçiniz</h3>
+    <h3 className="text-xs font-medium mb-1">Beden Seçiniz</h3>
     <div className="flex gap-2">
       {variants.map((variant, index) => (
         <button
           key={`${variant.size}-${index}`}
           onClick={() => onSelect(variant.size)}
-          className={`border px-3 py-1 rounded ${
+          className={`border px-2 py-1 rounded ${
             selectedSize === variant.size ? "bg-black text-white" : ""
           } ${variant.stock > 0 ? "" : "opacity-50 cursor-not-allowed"}`}
           disabled={variant.stock <= 0}
@@ -170,7 +173,7 @@ const AddToCartButton = ({ product, selectedSize }) => {
     <button
       onClick={handleAddToCart}
       disabled={loading}
-      className={`w-full bg-black text-white py-3 rounded mt-4 ${
+      className={`w-full bg-black text-white py-2 rounded mt-3 ${
         loading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-800"
       }`}
     >
@@ -179,10 +182,8 @@ const AddToCartButton = ({ product, selectedSize }) => {
   );
 };
 const ProductDetails = ({ product }) => {
-  // Detayları ayırmak için : ve , karakterlerine göre bölüyoruz
   let details = [];
   if (product.description) {
-    // Noktalı virgül veya yeni satır varsa ona göre böl
     if (product.description.includes(";")) {
       details = product.description
         .split(";")
@@ -200,20 +201,31 @@ const ProductDetails = ({ product }) => {
         .filter(Boolean);
     }
   }
+  const [showAll, setShowAll] = useState(false);
+  const visibleDetails = showAll ? details : details.slice(0, 3);
   return (
     <div className="mt-8">
-      <h3 className="font-semibold mb-2">Detaylar</h3>
-      <ul className="text-gray-700 text-sm list-disc pl-5">
-        {details.map((item, idx) => (
+      <h3 className="font-semibold mb-1 text-sm">Detaylar</h3>
+      <ul className="text-gray-600 text-xs list-disc pl-4">
+        {visibleDetails.map((item, idx) => (
           <li key={idx}>{item}</li>
         ))}
       </ul>
+      {details.length > 3 && (
+        <button
+          className="text-blue-600 mt-2 text-sm focus:outline-none"
+          onClick={() => setShowAll((prev) => !prev)}
+        >
+          {showAll ? "Daha az göster" : "Daha fazla göster"}
+        </button>
+      )}
     </div>
   );
 };
 
 const DeliveryInfo = () => {
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const [adminSettings, setAdminSettings] = useState({
     shippingLimit: 500,
     shippingFee: 49.9,
@@ -222,20 +234,25 @@ const DeliveryInfo = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const settings = await getAdminSettings();
+        let settings;
+        if (user && user.isAdmin) {
+          settings = await getAdminSettings();
+        } else {
+          settings = await getStoreInfo();
+        }
         setAdminSettings(settings);
       } catch (error) {
         console.error("Ayarlar alınamadı:", error);
       }
     };
     fetchSettings();
-  }, []);
+  }, [user]);
 
   return (
-    <div className="mt-8 pt-6 border-t border-gray-200">
-      <h3 className="text-sm font-medium mb-4">Kargo ve İade Bilgileri</h3>
-      <div className="space-y-3">
-        <div className="flex items-center text-sm text-gray-600">
+    <div className="mt-6 pt-4 border-t border-gray-200">
+      <h3 className="text-xs font-medium mb-2">Kargo ve İade Bilgileri</h3>
+      <div className="space-y-2">
+        <div className="flex items-center text-xs text-gray-500">
           <svg
             className="h-5 w-5 mr-2"
             fill="none"
@@ -254,7 +271,7 @@ const DeliveryInfo = () => {
             verilir
           </p>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-xs text-gray-500">
           <svg
             className="h-5 w-5 mr-2"
             fill="none"
@@ -273,7 +290,7 @@ const DeliveryInfo = () => {
             <strong>ücretsiz kargo</strong>
           </p>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-xs text-gray-500">
           <svg
             className="h-5 w-5 mr-2"
             fill="none"
@@ -351,8 +368,8 @@ const ProductDetail = () => {
           </li>
         </ol>
       </nav>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-7">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
           {/* Product gallery */}
           <ProductGallery
             images={
@@ -362,9 +379,9 @@ const ProductDetail = () => {
             }
           />
           {/* Product info */}
-          <div className="mt-10 md:mt-0">
-            <div className="border-b border-gray-200 pb-6">
-              <h1 className="text-2xl font-medium text-gray-900">
+          <div className="mt-8 md:mt-0">
+            <div className="border-b border-gray-200 pb-4">
+              <h1 className="text-xl font-medium text-gray-800">
                 {product.name?.toUpperCase()}
               </h1>
               <div className="mt-2 flex items-center">
@@ -390,14 +407,14 @@ const ProductDetail = () => {
               </div>
               <div className="mt-4 flex items-center">
                 {product.originalPrice && (
-                  <span className="text-base text-gray-400 line-through mr-2">
+                  <span className="text-sm text-gray-400 line-through mr-2">
                     ₺{" "}
                     {product.originalPrice?.toLocaleString("tr-TR", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 )}
-                <span className="text-3xl font-bold text-black tracking-tight">
+                <span className="text-2xl font-bold text-black tracking-tight">
                   ₺ {product.price}
                 </span>
                 {product.discount && (

@@ -16,3 +16,8 @@ export const getBestSellingCategories = async () => {
   const res = await axios.get(`${API_URL}/api/categories/best-sellers`);
   return res.data;
 };
+
+export const getCategoriesWithProducts = async () => {
+  const response = await axios.get(`${API_URL}/api/categories/with-products`);
+  return response.data;
+};

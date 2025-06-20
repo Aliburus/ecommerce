@@ -176,10 +176,10 @@ export default function Addresses() {
                   {address.phone
                     ? (() => {
                         let phone = address.phone.replace(/^0+/, "");
-                        phone = phone.startsWith("0") ? phone : "0" + phone;
+                        phone = "0" + phone;
                         return phone.replace(
-                          /(\d{3})(\d{3})(\d{2})(\d{2})$/,
-                          "0$1*** ** $4"
+                          /(0\d{3})(\d{3})(\d{2})(\d{2})$/,
+                          (_, p1, p2, p3, p4) => `${p1}*** ** ${p4}`
                         );
                       })()
                     : ""}

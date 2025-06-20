@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   User,
   // Settings,
-  CreditCard,
+  Tag,
   Heart,
   LogOut,
   Package,
@@ -11,6 +11,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import ProfileInfo from "../../components/users/ProfileInfo";
 import Orders from "../../components/users/Orders";
 
@@ -22,9 +23,11 @@ import {
   updateProfile,
   changePassword,
 } from "../../services/userService";
+import { getUserDiscounts } from "../../services/discountService";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -81,6 +84,7 @@ const Profile = () => {
     { id: "notifications", icon: Bell, label: "Bildirimler" },
     // { id: "settings", icon: Settings, label: "Ayarlar" },
     { id: "addresses", icon: MapPin, label: "Adreslerim" },
+    { id: "discounts", icon: Tag, label: "İndirimlerim" },
   ];
 
   if (loading) return <div>Yükleniyor...</div>;
@@ -122,7 +126,13 @@ const Profile = () => {
                   </button>
                 ))}
 
-                <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors mt-6">
+                <button
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors mt-6"
+                  onClick={async () => {
+                    await logout();
+                    navigate("/");
+                  }}
+                >
                   <LogOut className="h-5 w-5" />
                   <span>Çıkış Yap</span>
                 </button>
@@ -153,9 +163,105 @@ const Profile = () => {
             {activeTab === "notifications" && <Notifications />}
             {/* {activeTab === "settings" && <SettingsTab />} */}
             {activeTab === "addresses" && <Addresses />}
+            {activeTab === "discounts" && <DiscountList />}
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+// İndirimlerim bileşeni
+const DiscountList = () => {
+  const [discounts, setDiscounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchDiscounts = async () => {
+      try {
+        const data = await getUserDiscounts();
+        setDiscounts(data);
+      } catch (err) {
+        setError("İndirimler alınamadı");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDiscounts();
+  }, []);
+
+  if (loading) return <div>Yükleniyor...</div>;
+  if (error) return <div className="text-red-600">{error}</div>;
+  if (!discounts.length) return <div>Aktif indirim kuponunuz yok.</div>;
+
+  // Tarih formatlama fonksiyonu
+  const formatDateTR = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("tr-TR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-6">
+      <h2 className="text-lg font-bold mb-4">İndirimlerim</h2>
+      <ul className="space-y-4">
+        {discounts.map((d) => (
+          <li
+            key={d._id}
+            className="border p-4 rounded-lg flex flex-col md:flex-row md:items-center md:justify-between gap-2"
+          >
+            <div className="flex-1">
+              {/* Kod veya kategori etiketi */}
+              {d.isCategoryDiscount ? (
+                <div className="font-semibold text-base text-green-700 bg-green-50 px-2 py-1 rounded inline-block mb-1">
+                  Kategori İndirimi
+                  {d.categoryId && d.categoryId.name && (
+                    <span className="ml-2 text-xs text-green-900">
+                      ({d.categoryId.name})
+                    </span>
+                  )}
+                </div>
+              ) : (
+                d.code && (
+                  <div className="font-mono text-base font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded inline-block mb-1">
+                    {d.code}
+                  </div>
+                )
+              )}
+              {/* Açıklama */}
+              {d.description && (
+                <div className="text-gray-700 text-sm mb-1">
+                  {d.description}
+                </div>
+              )}
+              {/* İndirim tipi */}
+              <div className="text-xs text-gray-600 mb-1">
+                {d.type === "percentage"
+                  ? `%${d.value} indirim`
+                  : `${d.value} TL indirim`}
+              </div>
+              {/* Kategori indirimi değilse min alışveriş göster */}
+              {!d.isCategoryDiscount && d.minPurchaseAmount > 0 && (
+                <div className="text-xs text-gray-500">
+                  Min. Alışveriş: {d.minPurchaseAmount} TL
+                  {d.maxDiscountAmount
+                    ? `, Maks: ${d.maxDiscountAmount} TL`
+                    : ""}
+                </div>
+              )}
+            </div>
+            <div className="mt-2 md:mt-0 text-xs text-gray-500 text-right min-w-[180px]">
+              Geçerlilik:
+              <br />
+              {formatDateTR(d.startDate)} - {formatDateTR(d.endDate)}
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

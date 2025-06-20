@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import { FaUserShield } from "react-icons/fa";
-import { getAdminSettings } from "../services/adminSettingsService";
+import { getStoreInfo } from "../services/adminSettingsService";
 
 function Navbar() {
   const { user } = useAuth();
@@ -17,7 +17,7 @@ function Navbar() {
   useEffect(() => {
     const fetchStoreName = async () => {
       try {
-        const settings = await getAdminSettings();
+        const settings = await getStoreInfo();
         if (settings.storeName) {
           setStoreName(settings.storeName);
         }

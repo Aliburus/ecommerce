@@ -25,6 +25,7 @@ function Products({
     stock: "",
     category: "",
     gender: "Kadın",
+    color: "",
   });
   const [editProductForm, setEditProductForm] = useState({
     name: "",
@@ -35,6 +36,7 @@ function Products({
     category: "",
     gender: "Kadın",
     variants: [{ size: "", stock: "" }],
+    color: "",
   });
   const [addProductFiles, setAddProductFiles] = useState([]);
   const [editProductFiles, setEditProductFiles] = useState([]);
@@ -150,6 +152,10 @@ function Products({
       setAddProductError("Lütfen cinsiyet seçiniz.");
       return;
     }
+    if (!addProductForm.category) {
+      setAddProductError("Lütfen kategori seçiniz.");
+      return;
+    }
     try {
       const totalStock = addProductVariants.reduce(
         (sum, v) => sum + (parseInt(v.stock) || 0),
@@ -162,6 +168,7 @@ function Products({
       formData.append("category", addProductForm.category);
       formData.append("stock", totalStock);
       formData.append("gender", addProductForm.gender || "Kadın");
+      formData.append("color", addProductForm.color);
       const filteredVariants = addProductVariants.filter(
         (v) => v.size && v.stock !== undefined && v.stock !== ""
       );
@@ -206,6 +213,7 @@ function Products({
       formData.append("description", editProductForm.description);
       formData.append("category", editProductForm.category);
       formData.append("gender", editProductForm.gender);
+      formData.append("color", editProductForm.color || "");
 
       const totalStock = editProductForm.variants.reduce(
         (sum, v) => sum + (parseInt(v.stock) || 0),
@@ -267,6 +275,7 @@ function Products({
       category: product.category?._id || product.category,
       gender: product.gender || "Kadın",
       variants,
+      color: product.color || "",
     });
     setEditProductFiles([]);
     setEditProductModal({ open: true, product });
@@ -612,6 +621,17 @@ function Products({
                 </select>
               </div>
               <div className="mb-3">
+                <label className="block mb-1 text-sm">Renk</label>
+                <input
+                  type="text"
+                  name="color"
+                  value={addProductForm.color}
+                  onChange={handleAddProductFormChange}
+                  className="w-full border px-3 py-2 rounded text-sm"
+                  placeholder="Örn: Mavi"
+                />
+              </div>
+              <div className="mb-3">
                 <label className="block mb-1 text-sm">
                   Varyantlar (Beden, Stok)
                 </label>
@@ -765,6 +785,17 @@ function Products({
                         </option>
                       ))}
                     </select>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block mb-1 text-sm">Renk</label>
+                    <input
+                      type="text"
+                      name="color"
+                      value={editProductForm.color || ""}
+                      onChange={handleEditProductFormChange}
+                      className="w-full border px-3 py-2 rounded text-sm"
+                      placeholder="Örn: Mavi"
+                    />
                   </div>
                 </div>
                 <div>

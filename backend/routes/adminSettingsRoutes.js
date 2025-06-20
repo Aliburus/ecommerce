@@ -15,5 +15,6 @@ router.post("/test-mail", protect, admin, async (req, res) => {
 });
 router.get("/", protect, admin, adminSettingsController.getAdminSettings);
 router.put("/", protect, admin, adminSettingsController.updateAdminSettings);
+router.get("/public", adminSettingsController.getStoreInfo);
 
 module.exports = router;

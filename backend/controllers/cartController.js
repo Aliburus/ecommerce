@@ -35,6 +35,17 @@ const addToCart = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Ürün bulunamadı" });
     }
 
+    // Eğer ürün varyantlıysa ve beden seçilmemişse eklenemez
+    if (
+      Array.isArray(product.variants) &&
+      product.variants.length > 0 &&
+      !size
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Beden seçilmeden sepete eklenemez" });
+    }
+
     let cart = await Cart.findOne({ user: userId });
 
     if (!cart) {
@@ -138,9 +149,11 @@ const removeFromCart = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Sepet bulunamadı" });
     }
 
-    cart.items = cart.items.filter(
-      (item) => !(item.product.toString() === productId && item.size === size)
-    );
+    cart.items = cart.items.filter((item) => {
+      const itemSize = item.size || "";
+      const reqSize = size || "";
+      return !(item.product.toString() === productId && itemSize === reqSize);
+    });
     cart.totalAmount = cart.items.reduce(
       (total, item) => total + item.price * item.quantity,
       0

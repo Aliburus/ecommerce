@@ -1,4 +1,5 @@
 const Category = require("../models/categoryModel");
+const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
 
 // @desc    Get all categories
@@ -27,38 +28,51 @@ const createCategory = asyncHandler(async (req, res) => {
 
 // En çok satılan kategoriler
 const getBestSellingCategories = asyncHandler(async (req, res) => {
-  const result = await Category.aggregate([
-    {
-      $lookup: {
-        from: "products",
-        localField: "_id",
-        foreignField: "category",
-        as: "products",
-      },
-    },
-    {
-      $addFields: {
-        soldCount: { $sum: "$products.soldCount" },
-      },
-    },
-    {
-      $match: { soldCount: { $gt: 0 } },
-    },
-    {
-      $sort: { soldCount: -1 },
-    },
-    {
-      $limit: 5,
-    },
-    {
-      $project: { name: 1, soldCount: 1 },
-    },
-  ]);
+  const result = await Category.find({}).sort({ soldCount: -1 }).limit(5);
   res.json(result);
+});
+
+const updateCategory = asyncHandler(async (req, res) => {
+  const { name, slug } = req.body;
+  const category = await Category.findById(req.params.id);
+
+  if (category) {
+    category.name = name || category.name;
+    category.slug = slug || category.slug;
+    const updatedCategory = await category.save();
+    res.json(updatedCategory);
+  } else {
+    res.status(404);
+    throw new Error("Kategori bulunamadı");
+  }
+});
+
+// Kategori sil
+const deleteCategory = asyncHandler(async (req, res) => {
+  const category = await Category.findById(req.params.id);
+
+  if (category) {
+    await category.deleteOne();
+    res.json({ message: "Kategori silindi" });
+  } else {
+    res.status(404);
+    throw new Error("Kategori bulunamadı");
+  }
+});
+
+const getCategoriesWithProducts = asyncHandler(async (req, res) => {
+  const categoriesWithProducts = await Product.distinct("category");
+  const categories = await Category.find({
+    _id: { $in: categoriesWithProducts },
+  });
+  res.json(categories);
 });
 
 module.exports = {
   getCategories,
   createCategory,
   getBestSellingCategories,
+  updateCategory,
+  deleteCategory,
+  getCategoriesWithProducts,
 };

@@ -6,6 +6,7 @@ const sendEmail = require("../utils/sendEmail");
 const User = require("../models/userModel");
 const Category = require("../models/categoryModel");
 const fetch = require("node-fetch");
+const Cart = require("../models/cartModel");
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -82,6 +83,14 @@ const createOrder = asyncHandler(async (req, res) => {
   }
 
   res.status(201).json(createdOrder);
+
+  // Sipariş oluşturulduktan sonra kullanıcının sepetini temizle
+  const userCart = await Cart.findOne({ user: req.user._id });
+  if (userCart) {
+    userCart.items = [];
+    userCart.totalAmount = 0;
+    await userCart.save();
+  }
 });
 
 // @desc    Get logged in user orders

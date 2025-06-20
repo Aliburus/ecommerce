@@ -77,13 +77,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-12 shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-black py-8 px-2 sm:px-4 lg:px-6">
+      <div className="max-w-sm w-full space-y-6 bg-white p-6 shadow-md ">
         <div>
-          <h2 className="mt-6 text-center text-4xl font-extrabold text-black">
+          <h2 className="mt-4 text-center text-2xl font-bold text-black">
             Hesabınıza Giriş Yapın
           </h2>
-          <p className="mt-4 text-center text-lg text-gray-600">
+          <p className="mt-2 text-center text-base text-gray-600">
             Hesabınız yok mu?{" "}
             <Link
               to="/register"
@@ -96,7 +96,7 @@ const Login = () => {
 
         {(errors.message || errors.submit) && (
           <div
-            className={`px-4 py-3 text-lg ${
+            className={`px-3 py-2 text-base ${
               errors.message
                 ? "bg-green-100 border border-green-400 text-green-700"
                 : "bg-red-100 border border-red-400 text-red-700"
@@ -106,11 +106,11 @@ const Login = () => {
           </div>
         )}
 
-        <form className="mt-8 space-y-8" onSubmit={handleSubmit}>
+        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
           <div>
             <label
               htmlFor="email"
-              className="block text-lg font-medium text-black mb-1"
+              className="block text-base font-medium text-black mb-1"
             >
               Email
             </label>
@@ -121,20 +121,20 @@ const Login = () => {
               required
               value={formData.email}
               onChange={handleChange}
-              className={`mt-1 block w-full border-2 ${
+              className={`mt-1 block w-full border ${
                 errors.email ? "border-red-500" : "border-black"
-              } bg-white text-black text-xl py-4 px-4 outline-none focus:outline-none focus:ring-0`}
+              } bg-white text-black text-base py-2 px-3 outline-none focus:outline-none focus:ring-0 `}
               style={{ boxShadow: "none" }}
             />
             {errors.email && (
-              <p className="mt-1 text-base text-red-600">{errors.email}</p>
+              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
             )}
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="block text-lg font-medium text-black mb-1"
+              className="block text-base font-medium text-black mb-1"
             >
               Şifre
             </label>
@@ -145,34 +145,34 @@ const Login = () => {
               required
               value={formData.password}
               onChange={handleChange}
-              className={`mt-1 block w-full border-2 ${
+              className={`mt-1 block w-full border ${
                 errors.password ? "border-red-500" : "border-black"
-              } bg-white text-black text-xl py-4 px-4 outline-none focus:outline-none focus:ring-0`}
+              } bg-white text-black text-base py-2 px-3 outline-none focus:outline-none focus:ring-0 `}
               style={{ boxShadow: "none" }}
             />
             {errors.password && (
-              <p className="mt-1 text-base text-red-600">{errors.password}</p>
+              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center justify-between mt-1">
             <div className="flex items-center">
               <input
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-5 w-5 text-black border-black outline-none focus:outline-none focus:ring-0"
+                className="h-4 w-4 text-black border-black outline-none focus:outline-none focus:ring-0"
                 style={{ boxShadow: "none" }}
               />
               <label
                 htmlFor="remember-me"
-                className="ml-2 block text-lg text-black"
+                className="ml-2 block text-sm text-black"
               >
                 Beni hatırla
               </label>
             </div>
 
-            <div className="text-lg">
+            <div className="text-sm">
               <a href="#" className="font-bold text-black hover:text-gray-800">
                 Şifremi unuttum
               </a>
@@ -183,9 +183,9 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-4 px-4 border-2 border-black text-xl font-bold text-white ${
+              className={`w-full flex justify-center py-2 px-3 border border-black text-base font-bold text-white ${
                 loading ? "bg-gray-400" : "bg-black hover:bg-gray-800"
-              } outline-none focus:outline-none focus:ring-0`}
+              } outline-none focus:outline-none focus:ring-0 `}
               style={{ boxShadow: "none" }}
             >
               {loading ? "Giriş yapılıyor..." : "Giriş Yap"}

@@ -1,5 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { getProfile, login as loginService } from "../services/authService";
+import {
+  getProfile,
+  login as loginService,
+  logout as logoutService,
+} from "../services/authService";
 
 const AuthContext = createContext();
 
@@ -32,7 +36,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await logoutService();
     setUser(null);
   };
 
