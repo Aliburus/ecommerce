@@ -8,35 +8,35 @@ Bu proje, modern ve sade bir tasarıma sahip, React (web), Node.js/Express (back
 
 ### Anasayfa
 
-![Anasayfa](../screenshots/Homepage.jpeg)
+![Anasayfa](/screenshots/Homepage.jpeg)
 
 ### Ürünler (Kullanıcı)
 
-![Ürünler](../screenshots/Products.jpeg)
+![Ürünler](/screenshots/Products.jpeg)
 
 ### Ürünler (Admin)
 
-![Ürünler Admin](../screenshots/Proudcts-Admin.jpeg)
+![Ürünler Admin](/screenshots/Proudcts-Admin.jpeg)
 
 ### Dashboard (Admin)
 
-![Dashboard](../screenshots/Dashboard.jpeg)
+![Dashboard](/screenshots/Dashboard.jpeg)
 
 ### Siparişler (Admin)
 
-![Siparişler](../screenshots/Orders.jpeg)
+![Siparişler](/screenshots/Orders.jpeg)
 
 ### İndirimler (Admin)
 
-![İndirimler](../screenshots/Discounts.jpeg)
+![İndirimler](/screenshots/Discounts.jpeg)
 
 ### Koleksiyonlar (Admin)
 
-![Koleksiyonlar](../screenshots/Collections.jpeg)
+![Koleksiyonlar](/screenshots/Collections.jpeg)
 
 ### Profil (Kullanıcı)
 
-![Profil](../screenshots/Profile.jpeg)
+![Profil](/screenshots/Profile.jpeg)
 
 ## Sitenin Genel Yapısı
 
