@@ -1,138 +1,109 @@
-# 🛍️ E-Ticaret Yönetim Sistemi
+# E-Ticaret Uygulaması
 
-Modern, güvenli ve kullanıcı dostu bir e-ticaret çözümü. Müşteriler ve yöneticiler için kapsamlı alışveriş ve yönetim deneyimi.
+## Genel Bakış
 
-## ✨ Temel Özellikler
+Bu proje, modern ve sade bir tasarıma sahip, React (web), Node.js/Express (backend) ve MongoDB ile geliştirilmiş tam kapsamlı bir e-ticaret platformudur. Tüm arayüzler siyah-beyaz ve minimalist bir yaklaşımla hazırlanmıştır. Güvenlik, kullanıcı deneyimi ve mobil uyumluluk ön plandadır.
 
-### 🔒 Güvenlik & Kimlik Doğrulama
+## Ekran Görüntüleri
 
-- JWT tabanlı güvenli kimlik doğrulama
-- HTTP-only cookie ile güvenli oturum yönetimi
-- Rol tabanlı yetkilendirme sistemi
+### Anasayfa
 
-### 📦 Ürün Yönetimi
+![Anasayfa](../screenshots/Homepage.jpeg)
 
-- Çoklu varyant ve beden desteği
-- Stok takibi ve otomatik güncelleme
-- Kategorize edilmiş ürün listeleme
-- Gelişmiş ürün arama ve filtreleme
+### Ürünler (Kullanıcı)
 
-### 🛒 Sepet & Sipariş Sistemi
+![Ürünler](../screenshots/Products.jpeg)
 
-- Gerçek zamanlı stok kontrolü
-- Varyant/beden bazlı sepet yönetimi
-- Dinamik kargo ücreti hesaplama
-- Sipariş durumu takibi ve bildirimler
+### Ürünler (Admin)
 
-### 📊 Yönetim Paneli
+![Ürünler Admin](../screenshots/Proudcts-Admin.jpeg)
 
-- Gerçek zamanlı satış istatistikleri
-- Sipariş ve fatura yönetimi
-- Müşteri veritabanı yönetimi
-- Stok ve envanter kontrolü
+### Dashboard (Admin)
 
-### 📧 İletişim & Bildirimler
+![Dashboard](../screenshots/Dashboard.jpeg)
 
-- SMTP entegrasyonu ile e-posta bildirimleri
-- Sipariş durumu güncellemeleri
-- Otomatik fatura gönderimi
-- Toast bildirimleri ile kullanıcı geri bildirimi
+### Siparişler (Admin)
 
-## 🛠️ Teknoloji Yığını
+![Siparişler](../screenshots/Orders.jpeg)
 
-### Frontend
+### İndirimler (Admin)
 
-- React.js 18+
-- TailwindCSS
-- Axios
-- Zustand (State Management)
-- React Query
+![İndirimler](../screenshots/Discounts.jpeg)
 
-### Backend
+### Koleksiyonlar (Admin)
 
-- Node.js
-- Express.js
-- MongoDB & Mongoose
-- JWT & Bcrypt
-- Nodemailer
+![Koleksiyonlar](../screenshots/Collections.jpeg)
 
-## 🚀 Kurulum
+### Profil (Kullanıcı)
 
-### Gereksinimler
+![Profil](../screenshots/Profile.jpeg)
 
-- Node.js 16+
-- MongoDB 4.4+
-- npm veya yarn
+## Sitenin Genel Yapısı
 
-### Backend Kurulumu
+- **Kullanıcı Paneli:**
 
-```bash
-cd backend
-npm install
-cp .env.example .env  # .env dosyasını düzenle
-npm run dev
-```
+  - Kayıt, giriş, şifre sıfırlama
+  - Ürünleri listeleme, filtreleme, detay görüntüleme
+  - Sepet yönetimi, adres seçimi/ekleme, ödeme (İyzico entegrasyonu)
+  - Sipariş geçmişi, profil ve adres yönetimi
+  - Favoriler (wishlist)
 
-### Frontend Kurulumu
+- **Admin Paneli:**
 
-```bash
-cd frontend
-npm install
-npm start
-```
+  - Dashboard: Satış istatistikleri, en çok satılan ürünler
+  - Ürün yönetimi: Ürün ekleme, düzenleme, silme, grid/kart ve klasik görünüm
+  - Sipariş yönetimi: Siparişleri sıralama (teslim edilenler en sonda, diğerleri en yeni en üstte)
+  - Koleksiyon ve kategori yönetimi
+  - Toplu e-posta gönderimi (kampanya/indirim duyuruları)
+  - İndirim yönetimi: Yeni indirim oluşturma, mevcut indirimleri düzenleme/silme, indirimlerin otomatik olarak kullanıcılara e-posta ile duyurulması
+  - Ayarlar: Temel site ayarları
 
-## 🔧 Ortam Değişkenleri
+- **Tema ve Tasarım:**
 
-```env
-# Backend
-MONGODB_URI=
-JWT_SECRET=
-SMTP_HOST=
-SMTP_PORT=
-SMTP_USER=
-SMTP_PASS=
+  - Siyah-beyaz, sade ve modern arayüz
+  - Tüm sayfalarda responsive ve mobil uyumlu yapı
 
-# Frontend
-REACT_APP_API_URL=
-```
+- **Güvenlik:**
+  - JWT tabanlı kimlik doğrulama
+  - Şifre sıfırlama akışı (mail ile token gönderimi ve yeni şifre belirleme)
+  - Admin ve kullanıcı rolleri
+  - HTTP cookie ve oturum güvenliği
 
-## 📚 API Dokümantasyonu
+## İndirimler (Discounts) Özelliği
 
-API endpointleri ve kullanım örnekleri için `backend/routes/` klasörüne bakabilirsiniz.
+- **Admin için:**
+  - Admin panelinde özel bir "İndirimler" bölümü bulunur.
+  - Buradan yeni indirim oluşturulabilir, mevcut indirimler düzenlenebilir veya silinebilir.
+  - İndirimler belirli ürünlere, kategorilere veya tüm siteye uygulanabilir.
+  - İndirim oluşturulduğunda, sistem otomatik olarak toplu e-posta gönderimi yapar.
 
-## 🔐 Güvenlik Önlemleri
+## Admin Paneli Detayları
 
-- HTTP-only cookie kullanımı
-- CORS politikaları
-- Rate limiting
-- Input validasyonu
-- XSS koruması
+- **Dashboard:**
+  - Satış grafikleri ve özetler
+  - En çok satılan ürünler görsel ve modern kartlarla listelenir
+- **Ürünler:**
+  - Grid/kart ve klasik liste görünümü arasında geçiş
+  - Ürün ekleme, düzenleme, silme işlemleri
+  - Sayfa başı 10/20/50 ürün gösterme seçeneği
+- **Siparişler:**
+  - Teslim edilenler en sonda, diğerleri en yeni en üstte
+  - Sipariş detayları ve müşteri bilgileri
+- **Koleksiyonlar/Kategoriler:**
+  - Koleksiyon ve kategori ekleme, düzenleme, silme
+- **İndirimler:**
+  - İndirim oluşturma, düzenleme, silme ve toplu e-posta ile duyurma
+- **Toplu E-Posta Gönderimi:**
+  - Kampanya ve indirimlerde tüm kullanıcılara otomatik mail gönderimi
+- **Ayarlar:**
+  - Bildirim ve veri aktarımı bölümleri kaldırıldı, sadeleştirildi
 
-## 📱 Responsive Tasarım
+## Kurulum
 
-- Mobil öncelikli yaklaşım
-- TailwindCSS ile responsive grid sistemi
-- Touch-friendly arayüz
-- Cross-browser uyumluluk
+1. `npm install` ile bağımlılıkları yükleyin.
+2. `npm start` ile projeyi başlatın.
+3. Backend için ayrı olarak backend klasöründe de aynı işlemleri uygulayın.
 
-## 📸 Ekran Görüntüleri
+## Katkı ve Lisans
 
-> Tüm ekran görüntüleri `screenshots` klasöründe bulunmaktadır.
-
-## 🤝 Katkıda Bulunma
-
-1. Fork yapın
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add amazing feature'`)
-4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
-5. Pull Request oluşturun
-
-## 📄 Lisans
-
-Tüm Hakları Saklıdır
-
-## 📞 İletişim
-
-Proje Sahibi - [@Aliburus](https://github.com/Aliburus)
-
-Proje Linki: [https://github.com/Aliburus/ecommerce](https://github.com/Aliburus/ecommerce)
+Açık kaynaklıdır. Katkıda bulunmak için PR gönderebilirsiniz.

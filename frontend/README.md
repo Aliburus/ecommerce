@@ -1,109 +1,70 @@
-# E-Ticaret Uygulaması
+# Getting Started with Create React App
 
-## Genel Bakış
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-Bu proje, modern ve sade bir tasarıma sahip, React (web), Node.js/Express (backend) ve MongoDB ile geliştirilmiş tam kapsamlı bir e-ticaret platformudur. Tüm arayüzler siyah-beyaz ve minimalist bir yaklaşımla hazırlanmıştır. Güvenlik, kullanıcı deneyimi ve mobil uyumluluk ön plandadır.
+## Available Scripts
 
-## Ekran Görüntüleri
+In the project directory, you can run:
 
-### Anasayfa
+### `npm start`
 
-![Anasayfa](../screenshots/Homepage.jpeg)
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-### Ürünler (Kullanıcı)
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-![Ürünler](../screenshots/Products.jpeg)
+### `npm test`
 
-### Ürünler (Admin)
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-![Ürünler Admin](../screenshots/Proudcts-Admin.jpeg)
+### `npm run build`
 
-### Dashboard (Admin)
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-![Dashboard](../screenshots/Dashboard.jpeg)
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-### Siparişler (Admin)
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-![Siparişler](../screenshots/Orders.jpeg)
+### `npm run eject`
 
-### İndirimler (Admin)
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-![İndirimler](../screenshots/Discounts.jpeg)
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-### Koleksiyonlar (Admin)
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-![Koleksiyonlar](../screenshots/Collections.jpeg)
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-### Profil (Kullanıcı)
+## Learn More
 
-![Profil](../screenshots/Profile.jpeg)
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-## Sitenin Genel Yapısı
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-- **Kullanıcı Paneli:**
+### Code Splitting
 
-  - Kayıt, giriş, şifre sıfırlama
-  - Ürünleri listeleme, filtreleme, detay görüntüleme
-  - Sepet yönetimi, adres seçimi/ekleme, ödeme (İyzico entegrasyonu)
-  - Sipariş geçmişi, profil ve adres yönetimi
-  - Favoriler (wishlist)
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-- **Admin Paneli:**
+### Analyzing the Bundle Size
 
-  - Dashboard: Satış istatistikleri, en çok satılan ürünler
-  - Ürün yönetimi: Ürün ekleme, düzenleme, silme, grid/kart ve klasik görünüm
-  - Sipariş yönetimi: Siparişleri sıralama (teslim edilenler en sonda, diğerleri en yeni en üstte)
-  - Koleksiyon ve kategori yönetimi
-  - Toplu e-posta gönderimi (kampanya/indirim duyuruları)
-  - İndirim yönetimi: Yeni indirim oluşturma, mevcut indirimleri düzenleme/silme, indirimlerin otomatik olarak kullanıcılara e-posta ile duyurulması
-  - Ayarlar: Temel site ayarları
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-- **Tema ve Tasarım:**
+### Making a Progressive Web App
 
-  - Siyah-beyaz, sade ve modern arayüz
-  - Tüm sayfalarda responsive ve mobil uyumlu yapı
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-- **Güvenlik:**
-  - JWT tabanlı kimlik doğrulama
-  - Şifre sıfırlama akışı (mail ile token gönderimi ve yeni şifre belirleme)
-  - Admin ve kullanıcı rolleri
-  - HTTP cookie ve oturum güvenliği
+### Advanced Configuration
 
-## İndirimler (Discounts) Özelliği
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-- **Admin için:**
-  - Admin panelinde özel bir "İndirimler" bölümü bulunur.
-  - Buradan yeni indirim oluşturulabilir, mevcut indirimler düzenlenebilir veya silinebilir.
-  - İndirimler belirli ürünlere, kategorilere veya tüm siteye uygulanabilir.
-  - İndirim oluşturulduğunda, sistem otomatik olarak toplu e-posta gönderimi yapar.
+### Deployment
 
-## Admin Paneli Detayları
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
-- **Dashboard:**
-  - Satış grafikleri ve özetler
-  - En çok satılan ürünler görsel ve modern kartlarla listelenir
-- **Ürünler:**
-  - Grid/kart ve klasik liste görünümü arasında geçiş
-  - Ürün ekleme, düzenleme, silme işlemleri
-  - Sayfa başı 10/20/50 ürün gösterme seçeneği
-- **Siparişler:**
-  - Teslim edilenler en sonda, diğerleri en yeni en üstte
-  - Sipariş detayları ve müşteri bilgileri
-- **Koleksiyonlar/Kategoriler:**
-  - Koleksiyon ve kategori ekleme, düzenleme, silme
-- **İndirimler:**
-  - İndirim oluşturma, düzenleme, silme ve toplu e-posta ile duyurma
-- **Toplu E-Posta Gönderimi:**
-  - Kampanya ve indirimlerde tüm kullanıcılara otomatik mail gönderimi
-- **Ayarlar:**
-  - Bildirim ve veri aktarımı bölümleri kaldırıldı, sadeleştirildi
+### `npm run build` fails to minify
 
-## Kurulum
-
-1. `npm install` ile bağımlılıkları yükleyin.
-2. `npm start` ile projeyi başlatın.
-3. Backend için ayrı olarak backend klasöründe de aynı işlemleri uygulayın.
-
-## Katkı ve Lisans
-
-Açık kaynaklıdır. Katkıda bulunmak için PR gönderebilirsiniz.
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
