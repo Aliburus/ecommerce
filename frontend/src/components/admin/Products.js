@@ -51,7 +51,7 @@ function Products({
   const [importError, setImportError] = useState("");
   const [importSuccess, setImportSuccess] = useState("");
   const [page, setPage] = useState(0);
-  const productsPerPage = 10;
+  const [productsPerPage, setProductsPerPage] = useState(10);
   const totalPages = Math.ceil(products.length / productsPerPage);
   const pagedProducts = products.slice(
     page * productsPerPage,
@@ -381,6 +381,21 @@ function Products({
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Ürünler</h1>
         <div className="flex items-center space-x-4">
+          <label className="text-sm text-black font-semibold">
+            Sayfa başı:
+          </label>
+          <select
+            value={productsPerPage}
+            onChange={(e) => {
+              setProductsPerPage(Number(e.target.value));
+              setPage(0);
+            }}
+            className="border px-2 py-1 text-sm bg-white text-black"
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
           <button
             onClick={downloadTemplate}
             className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50"
@@ -471,19 +486,19 @@ function Products({
               return (
                 <div
                   key={product._id}
-                  className="flex items-center bg-white rounded-xl shadow-sm overflow-hidden p-3 hover:bg-gray-50 transition-all min-h-[90px]"
+                  className="flex items-center bg-white shadow-sm overflow-hidden p-3 hover:bg-gray-50 transition-all min-h-[90px] border-b border-gray-200"
                 >
                   <img
                     src={imgSrc}
                     alt={product.name}
-                    className="w-16 h-16 object-cover rounded-lg mr-4 flex-shrink-0"
+                    className="w-16 h-16 object-cover mr-4 flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm truncate">
+                    <h3 className="font-semibold text-sm truncate text-black">
                       {product.name}
                     </h3>
                     <div className="flex flex-wrap gap-2 items-center mt-1">
-                      <span className="text-gray-600 text-xs">
+                      <span className="text-black text-xs">
                         {product.price} ₺
                       </span>
                       <span className="text-xs text-gray-500">
@@ -494,13 +509,13 @@ function Products({
                   <div className="flex flex-col gap-1 ml-4">
                     <button
                       onClick={() => openEditProductModal(product)}
-                      className="px-3 py-1 bg-black text-white rounded-lg hover:bg-gray-800 text-xs"
+                      className="px-3 py-1 bg-black text-white text-xs font-semibold border-0 rounded-none hover:bg-gray-900 transition"
                     >
                       Düzenle
                     </button>
                     <button
                       onClick={() => onDeleteProduct(product._id)}
-                      className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-800 text-xs"
+                      className="px-3 py-1 bg-red-600 text-white text-xs font-semibold border-0 rounded-none hover:bg-red-800 transition"
                     >
                       Sil
                     </button>
@@ -516,10 +531,10 @@ function Products({
               <button
                 key={idx}
                 onClick={() => setPage(idx)}
-                className={`w-8 h-8 rounded-full border text-sm font-medium ${
+                className={`w-8 h-8 border text-sm font-medium ${
                   page === idx
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-black hover:bg-gray-100 border-gray-300"
                 }`}
               >
                 {idx + 1}

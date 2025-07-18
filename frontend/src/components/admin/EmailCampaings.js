@@ -66,7 +66,7 @@ const EmailCampaings = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Email Kampanyaları</h1>
+        <h1 className="text-2xl font-bold mb-8">Toplu E-Posta Gönderimi</h1>
       </div>
 
       {/* Kampanya Oluşturma Formu */}

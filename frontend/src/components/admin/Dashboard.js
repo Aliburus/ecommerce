@@ -321,56 +321,39 @@ function Dashboard() {
               Şu anda en çok satan ürün yok
             </div>
           ) : (
-            <div className="flex items-center">
-              <button
-                className="mr-2 px-2 py-1 rounded bg-gray-100 hover:bg-gray-200"
-                onClick={() => setProductPage((prev) => Math.max(prev - 1, 0))}
-                disabled={productPage === 0}
-              >
-                &#8592;
-              </button>
-              <div className="flex space-x-3 overflow-x-auto pb-2">
-                {pagedProducts.map((p) => (
-                  <div
-                    key={p._id}
-                    className="flex flex-col items-center min-w-[100px] max-w-[110px] bg-gray-50 rounded-lg p-2 cursor-pointer hover:bg-gray-100"
-                    onClick={() => navigate(`/urun/${p._id}`)}
-                  >
-                    <img
-                      src={
-                        p.images?.[0]?.url?.startsWith("http")
-                          ? p.images?.[0]?.url
-                          : `${
-                              process.env.REACT_APP_API_URL ||
-                              "http://localhost:5000"
-                            }${p.images?.[0]?.url}`
-                      }
-                      alt={p.name}
-                      className="w-12 h-12 object-cover rounded mb-1"
-                    />
-                    <span className="font-medium text-center text-xs line-clamp-2">
-                      {p.name}
-                    </span>
-                    <span className="text-[10px] text-gray-500">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {bestProducts.slice(0, 6).map((p, idx) => (
+                <div
+                  key={p._id}
+                  className="group bg-gray-50 rounded-xl p-4 flex flex-col items-center shadow hover:shadow-lg transition cursor-pointer relative border border-gray-100 hover:border-blue-500"
+                  onClick={() => navigate(`/urun/${p._id}`)}
+                >
+                  <img
+                    src={
+                      p.images?.[0]?.url?.startsWith("http")
+                        ? p.images?.[0]?.url
+                        : `${
+                            process.env.REACT_APP_API_URL ||
+                            "http://localhost:5000"
+                          }${p.images?.[0]?.url}`
+                    }
+                    alt={p.name}
+                    className="w-20 h-20 object-cover rounded-lg mb-2 border-2 border-white group-hover:scale-105 transition"
+                  />
+                  <div className="font-semibold text-center text-sm line-clamp-2 mb-1 text-black group-hover:text-blue-600">
+                    {p.name}
+                  </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">
                       {p.soldCount} satış
                     </span>
+                    <span className="text-xs text-gray-500">₺{p.price}</span>
                   </div>
-                ))}
-              </div>
-              <button
-                className="ml-2 px-2 py-1 rounded bg-gray-100 hover:bg-gray-200"
-                onClick={() =>
-                  setProductPage((prev) =>
-                    Math.min(prev + 1, totalProductPages - 1)
-                  )
-                }
-                disabled={
-                  productPage === totalProductPages - 1 ||
-                  totalProductPages === 0
-                }
-              >
-                &#8594;
-              </button>
+                  <div className="absolute top-2 right-2 bg-white rounded-full shadow px-2 py-1 text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition">
+                    #{idx + 1}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
           {totalProductPages > 1 && (

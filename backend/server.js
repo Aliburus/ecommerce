@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -26,7 +27,6 @@ const recommendationRoutes = require("./routes/recommendationRoutes");
 const emailCampaignRoutes = require("./routes/emailCampaignRoutes");
 const discountRoutes = require("./routes/discountRoutes");
 
-dotenv.config();
 const app = express();
 
 // Connect to MongoDB
@@ -51,22 +51,25 @@ app.use(
   })
 );
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/addresses", addressRoutes);
-app.use("/api/invoices", invoiceRoutes);
-app.use("/api/admins", adminRoutes);
-app.use("/api/collections", collectionRoutes);
-app.use("/api/admin-settings", adminSettingsRoutes);
-app.use("/api/hero", heroRoutes);
-app.use("/api/recommendations", recommendationRoutes);
-app.use("/api/email-campaigns", emailCampaignRoutes);
-app.use("/api/discounts", discountRoutes);
+// Route'ları dizi ile tanımlayıp döngüyle ekle
+const routes = [
+  ["/api/auth", authRoutes],
+  ["/api/products", productRoutes],
+  ["/api/categories", categoryRoutes],
+  ["/api/user", userRoutes],
+  ["/api/orders", orderRoutes],
+  ["/api/cart", cartRoutes],
+  ["/api/addresses", addressRoutes],
+  ["/api/invoices", invoiceRoutes],
+  ["/api/admins", adminRoutes],
+  ["/api/collections", collectionRoutes],
+  ["/api/admin-settings", adminSettingsRoutes],
+  ["/api/hero", heroRoutes],
+  ["/api/recommendations", recommendationRoutes],
+  ["/api/email-campaigns", emailCampaignRoutes],
+  ["/api/discounts", discountRoutes],
+];
+routes.forEach(([path, handler]) => app.use(path, handler));
 
 // Static uploads
 const uploadsPath = path.join(__dirname, "uploads");

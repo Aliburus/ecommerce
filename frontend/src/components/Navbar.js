@@ -100,20 +100,39 @@ function Navbar() {
               </span>
             )}
           </Link>
-          <Link
-            to={user ? "/users/profile" : "/login"}
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <User className="h-5 w-5 text-gray-700" />
-          </Link>
-          {user && user.isAdmin && (
-            <button
-              className="p-2 hover:bg-gray-100 rounded-full ml-2"
-              title="Admin Panel"
-              onClick={() => navigate("/admin")}
-            >
-              <FaUserShield className="h-5 w-5 text-blue-600" />
-            </button>
+          {!user ? (
+            <>
+              <Link
+                to="/login"
+                className="p-2 hover:bg-gray-100 rounded-full font-semibold"
+              >
+                Giriş Yap
+              </Link>
+              <Link
+                to="/register"
+                className="p-2 hover:bg-gray-100 rounded-full font-semibold"
+              >
+                Kaydol
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/users/profile"
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <User className="h-5 w-5 text-gray-700" />
+              </Link>
+              {user && user.isAdmin && (
+                <button
+                  className="p-2 hover:bg-gray-100 rounded-full ml-2"
+                  title="Admin Panel"
+                  onClick={() => navigate("/admin")}
+                >
+                  <FaUserShield className="h-5 w-5 text-blue-600" />
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

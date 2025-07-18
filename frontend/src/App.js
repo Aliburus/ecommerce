@@ -27,6 +27,10 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import OrderDetail from "./components/admin/OrderDetail";
 import { Toaster } from "react-hot-toast";
 import CustomerDetail from "./components/admin/CustomerDetail";
+import Payment from "./pages/Payment";
+import AddressSelect from "./pages/AddressSelect";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -112,6 +116,30 @@ function App() {
                     />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route
+                      path="/payment"
+                      element={
+                        <PrivateRoute>
+                          <Payment />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="/address-select"
+                      element={
+                        <PrivateRoute>
+                          <AddressSelect />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route
+                      path="/reset-password/:token"
+                      element={<ResetPassword />}
+                    />
                   </Routes>
                 </main>
                 <Footer />

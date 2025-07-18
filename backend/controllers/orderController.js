@@ -7,12 +7,13 @@ const User = require("../models/userModel");
 const Category = require("../models/categoryModel");
 const fetch = require("node-fetch");
 const Cart = require("../models/cartModel");
+const iyzicoService = require("../services/iyzicoService");
 
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
 const createOrder = asyncHandler(async (req, res) => {
-  const { items, shippingAddress, paymentMethod } = req.body;
+  const { items, shippingAddress, paymentMethod, cardInfo } = req.body;
 
   if (!items || items.length === 0) {
     res.status(400);
@@ -53,6 +54,21 @@ const createOrder = asyncHandler(async (req, res) => {
     }
   }
 
+  // iyzico ile ödeme işlemi
+  let paymentResult = null;
+  if (paymentMethod === "iyzico") {
+    paymentResult = await iyzicoService.makePayment({
+      amount: totalAmount,
+      cardInfo,
+      user: req.user,
+      items,
+    });
+    if (!paymentResult.success) {
+      res.status(400);
+      throw new Error("Ödeme başarısız: " + paymentResult.message);
+    }
+  }
+
   const order = new Order({
     user: req.user._id,
     items,
@@ -60,6 +76,7 @@ const createOrder = asyncHandler(async (req, res) => {
     shippingAddress,
     paymentMethod,
     status: "pending",
+    paymentStatus: paymentMethod === "iyzico" ? "completed" : "pending",
   });
 
   const createdOrder = await order.save();

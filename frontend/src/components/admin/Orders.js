@@ -81,6 +81,16 @@ function Orders({ onViewOrder, onUpdateStatus }) {
     navigate(`/admin/orders/${orderId}`);
   };
 
+  // Siparişleri sıralama: Teslim edilenler en sonda, diğerleri en yeni en üstte, kendi içlerinde tarihe göre
+  const sortedOrders = [
+    ...orders
+      .filter((o) => o.status !== "delivered")
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+    ...orders
+      .filter((o) => o.status === "delivered")
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+  ];
+
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
@@ -178,7 +188,7 @@ function Orders({ onViewOrder, onUpdateStatus }) {
             </tr>
           </thead>
           <tbody>
-            {orders.length === 0 ? (
+            {sortedOrders.length === 0 ? (
               <tr>
                 <td
                   colSpan="7"
@@ -188,7 +198,7 @@ function Orders({ onViewOrder, onUpdateStatus }) {
                 </td>
               </tr>
             ) : (
-              orders.map((order) => (
+              sortedOrders.map((order) => (
                 <tr key={order._id} className="border-b last:border-0">
                   <td className="py-4">{order._id.slice(-6).toUpperCase()}</td>
                   <td className="py-4">

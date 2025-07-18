@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "iyzipay": "^2.0.64",
     "mongoose": "^8.16.0"
   }
 }

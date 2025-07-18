@@ -360,8 +360,24 @@ function Card() {
                 <span>Toplam</span>
                 <span>{(discountedSubtotal + shippingCost).toFixed(2)} TL</span>
               </div>
-              <button className="mt-6 w-full py-3  bg-black text-white font-semibold text-lg hover:bg-gray-900 transition">
-                Sepeti Onayla
+              <button
+                className="mt-6 w-full py-3  bg-black text-white font-semibold text-lg hover:bg-gray-900 transition"
+                onClick={() =>
+                  navigate("/address-select", {
+                    state: {
+                      items: localCart.items.map((item) => ({
+                        product: item.product._id,
+                        quantity: item.quantity,
+                        price: item.price,
+                        size: item.size,
+                      })),
+                      paymentMethod: "iyzico",
+                      totalAmount: discountedSubtotal + shippingCost,
+                    },
+                  })
+                }
+              >
+                Ödemeye Geç
               </button>
               <div className="mt-4">
                 <label className="block text-sm font-medium mb-1 text-black">

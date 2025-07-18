@@ -19,6 +19,7 @@
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
     "express-fileupload": "^1.5.1",
+    "iyzipay": "^2.0.64",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.5.0",
     "node-fetch": "^2.7.0",

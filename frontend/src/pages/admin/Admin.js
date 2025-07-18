@@ -231,7 +231,7 @@ function Admin() {
     { id: "collections", icon: BarChart, label: "Koleksiyonlar" },
     { id: "customers", icon: Users, label: "Müşteriler" },
     { id: "discounts", icon: Percent, label: "İndirimler" },
-    { id: "campaigns", icon: Mail, label: "Email Kampanyaları" },
+    { id: "campaigns", icon: Mail, label: "Toplu E-Posta " },
     { id: "settings", icon: Settings, label: "Ayarlar" },
   ];
 

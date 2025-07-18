@@ -192,6 +192,14 @@ const Login = () => {
             </button>
           </div>
         </form>
+        <div className="flex justify-end mb-4">
+          <a
+            href="/forgot-password"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Şifremi Unuttum?
+          </a>
+        </div>
       </div>
     </div>
   );
